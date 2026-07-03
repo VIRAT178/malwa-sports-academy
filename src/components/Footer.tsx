@@ -16,7 +16,7 @@ export default function Footer({ setView }: FooterProps) {
     <footer className="bg-zinc-950 text-zinc-400 text-xs sm:text-sm border-t border-zinc-800">
       
       {/* Upper Footer section */}
-      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
         
         {/* Column 1: Brand & Socials */}
         <div className="space-y-4">
@@ -139,31 +139,31 @@ export default function Footer({ setView }: FooterProps) {
             ABOUT MALWA SPORTS ACADEMY
           </h4>
           <div className="space-y-1.5 text-xs">
-            <div className="flex justify-between border-b border-zinc-800 pb-1">
+            <div className="flex flex-wrap justify-between gap-x-3 gap-y-1 border-b border-zinc-800 pb-1">
               <span className="text-zinc-500 font-bold">Monday</span>
               <span className="text-white font-semibold">6:00am - 10:00pm</span>
             </div>
-            <div className="flex justify-between border-b border-zinc-800 pb-1">
+            <div className="flex flex-wrap justify-between gap-x-3 gap-y-1 border-b border-zinc-800 pb-1">
               <span className="text-zinc-500 font-bold">Tuesday</span>
               <span className="text-white font-semibold">6:00am - 10:00pm</span>
             </div>
-            <div className="flex justify-between border-b border-zinc-800 pb-1">
+            <div className="flex flex-wrap justify-between gap-x-3 gap-y-1 border-b border-zinc-800 pb-1">
               <span className="text-zinc-500 font-bold">Wednesday</span>
               <span className="text-white font-semibold">6:00am - 10:00pm</span>
             </div>
-            <div className="flex justify-between border-b border-zinc-800 pb-1">
+            <div className="flex flex-wrap justify-between gap-x-3 gap-y-1 border-b border-zinc-800 pb-1">
               <span className="text-zinc-500 font-bold">Thursday</span>
               <span className="text-white font-semibold">6:00am - 10:00pm</span>
             </div>
-            <div className="flex justify-between border-b border-zinc-800 pb-1">
+            <div className="flex flex-wrap justify-between gap-x-3 gap-y-1 border-b border-zinc-800 pb-1">
               <span className="text-zinc-500 font-bold">Friday</span>
               <span className="text-white font-semibold">6:00am - 10:00pm</span>
             </div>
-            <div className="flex justify-between border-b border-zinc-800 pb-1">
+            <div className="flex flex-wrap justify-between gap-x-3 gap-y-1 border-b border-zinc-800 pb-1">
               <span className="text-zinc-500 font-bold">Saturday</span>
               <span className="text-white font-semibold">6:00am - 10:00pm</span>
             </div>
-            <div className="flex justify-between pb-1">
+            <div className="flex flex-wrap justify-between gap-x-3 gap-y-1 pb-1">
               <span className="text-zinc-500 font-bold">Sunday</span>
               <span className="text-white font-semibold">8:00am - 12:00pm</span>
             </div>
@@ -214,9 +214,9 @@ export default function Footer({ setView }: FooterProps) {
 
       {/* Sub-footer copyright */}
       <div className="border-t border-zinc-900 bg-black py-4 text-center text-[10px] text-zinc-600 font-bold uppercase tracking-wider">
-        <div className="mx-auto max-w-7xl px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+        <div className="mx-auto max-w-7xl px-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
           <span>Copyright 2026, Malwa Sports Academy (MSA). All Rights Reserved.</span>
-          <div className="flex space-x-3 font-semibold">
+          <div className="flex flex-wrap items-center justify-center sm:justify-end gap-x-3 gap-y-1 font-semibold">
             <a href="#privacy" className="hover:text-red-500">Privacy Policy</a>
             <span>•</span>
             <a href="#terms" className="hover:text-red-500">Terms and conditions</a>

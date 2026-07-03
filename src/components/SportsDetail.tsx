@@ -19,7 +19,7 @@ export default function SportsDetail({ sportId, onBack, onRegisterClick }: Sport
       <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 space-y-10">
         
         {/* Navigation Back Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <button
             onClick={onBack}
             className="flex items-center space-x-1.5 text-xs font-black uppercase tracking-wider text-zinc-600 hover:text-zinc-900 bg-white border border-zinc-200 hover:border-zinc-400 rounded-lg px-4 py-2 transition shadow-sm cursor-pointer"
@@ -29,7 +29,7 @@ export default function SportsDetail({ sportId, onBack, onRegisterClick }: Sport
             <span>Back to Club</span>
           </button>
           
-          <span className="text-xs font-mono text-zinc-500 uppercase font-bold">
+          <span className="text-[10px] sm:text-xs font-mono text-zinc-500 uppercase font-bold sm:text-right">
             Malwa Sports Academy Syllabus
           </span>
         </div>
@@ -56,11 +56,11 @@ export default function SportsDetail({ sportId, onBack, onRegisterClick }: Sport
               <span>MSA PERFORMANCE PROGRAM</span>
             </div>
             
-            <div className="flex items-center space-x-3.5">
+            <div className="flex items-start sm:items-center space-x-3.5">
               <span className="flex items-center justify-center bg-white/10 backdrop-blur-md border border-white/20 h-11 w-11 sm:h-12 sm:w-12 rounded-full text-white shrink-0 shadow-md">
                 {getSportIcon(sport.id, "h-5 w-5 text-white")}
               </span>
-              <h1 className="font-display text-2xl sm:text-4xl font-black uppercase text-white tracking-wide leading-none">
+              <h1 className="font-display text-xl sm:text-4xl font-black uppercase text-white tracking-wide leading-tight sm:leading-none">
                 {sport.name} <span className="text-red-500">PROGRAM</span>
               </h1>
             </div>
@@ -174,7 +174,7 @@ export default function SportsDetail({ sportId, onBack, onRegisterClick }: Sport
               </h4>
               <div className="space-y-2.5">
                 {sport.coaches.map((c, idx) => (
-                  <div key={idx} className="flex items-center space-x-2">
+                  <div key={idx} className="flex items-start space-x-2">
                     <div className="h-1.5 w-1.5 bg-red-600 rounded-full" />
                     <span className="text-xs font-bold text-zinc-700">{c}</span>
                   </div>

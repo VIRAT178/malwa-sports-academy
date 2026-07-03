@@ -297,7 +297,7 @@ export default function App() {
 
         {/* ==================== 1. HOME VIEW ==================== */}
         {currentView === "home" && (
-          <div className="space-y-24 pb-24">
+          <div className="space-y-16 sm:space-y-24 pb-16 sm:pb-24">
             
             {/* Automatic Dynamic Background Sliding Hero */}
             <Hero 
@@ -330,7 +330,7 @@ export default function App() {
                       setSelectedSportId(sport.id);
                       setView("sports-detail");
                     }}
-                    className="group relative h-[380px] rounded-2xl overflow-hidden border border-zinc-200/10 bg-zinc-950 cursor-pointer shadow-md hover:border-red-600 hover:shadow-2xl transition-all duration-300 flex flex-col justify-end"
+                    className="group relative h-80 sm:h-96 rounded-2xl overflow-hidden border border-zinc-200/10 bg-zinc-950 cursor-pointer shadow-md hover:border-red-600 hover:shadow-2xl transition-all duration-300 flex flex-col justify-end"
                   >
                     {/* Background Image covering entire card */}
                     <div className="absolute inset-0 z-0">
@@ -360,7 +360,7 @@ export default function App() {
                           MSA PATHWAY
                         </span>
                         
-                        <h3 className="font-display text-2.5xl font-black uppercase text-white tracking-wider flex items-center justify-between">
+                        <h3 className="font-display text-2xl sm:text-3xl font-black uppercase text-white tracking-wider flex items-center justify-between gap-2">
                           <span>{sport.name}</span>
                           <ChevronRight className="h-5 w-5 text-red-500 group-hover:translate-x-1 group-hover:text-red-400 transition-transform" />
                         </h3>
@@ -391,7 +391,7 @@ export default function App() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                   {FACILITIES.map((fac, idx) => (
                     <div key={idx} className="group rounded-2xl overflow-hidden border border-zinc-200 bg-white shadow-sm hover:shadow-xl transition-all duration-300">
-                      <div className="h-52 overflow-hidden relative">
+                      <div className="h-44 sm:h-52 overflow-hidden relative">
                         <img 
                           src={fac.image} 
                           alt={fac.title}
@@ -399,7 +399,7 @@ export default function App() {
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                       </div>
-                      <div className="p-6 space-y-2">
+                      <div className="p-5 sm:p-6 space-y-2">
                         <h3 className="font-title text-lg font-black uppercase tracking-wider text-zinc-900">
                           {fac.title}
                         </h3>
@@ -414,7 +414,7 @@ export default function App() {
             </section>
 
             {/* Gallery Preview Masonry */}
-            <section id="gallery-section" className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 border-b border-zinc-200">
+            <section id="gallery-section" className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-14 sm:py-16 border-b border-zinc-200">
               <div className="text-center max-w-2xl mx-auto space-y-3 mb-12">
                 <span className="text-xs font-black text-red-600 uppercase tracking-widest block">INSTANT SNAPSHOTS</span>
                 <h2 className="font-display text-3xl sm:text-5xl font-black uppercase text-zinc-900">
@@ -445,7 +445,7 @@ export default function App() {
             </section>
 
             {/* Featured Coaches */}
-            <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
+            <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-14 sm:py-16">
               <div className="text-center max-w-2xl mx-auto space-y-3 mb-16">
                 <span className="text-xs font-black text-red-600 uppercase tracking-widest block">MEET THE MASTERS</span>
                 <h2 className="font-display text-3xl sm:text-5xl font-black uppercase text-zinc-900 tracking-wide">
@@ -474,7 +474,7 @@ export default function App() {
                       </div>
                     </div>
                     
-                    <div className="p-5 space-y-3">
+                    <div className="p-4 sm:p-5 space-y-3">
                       <div>
                         <h4 className="font-title text-lg font-black uppercase text-zinc-900">{coach.name}</h4>
                         <span className="block text-zinc-500 text-[10px] uppercase font-black tracking-widest">{coach.role}</span>
@@ -641,7 +641,7 @@ export default function App() {
             </section>
 
             {/* Statistics Counters banner */}
-            <section className="bg-red-50 border-y border-red-100 py-16">
+            <section className="bg-red-50 border-y border-red-100 py-14 sm:py-16">
               <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 grid grid-cols-2 lg:grid-cols-4 gap-8">
                 {stats.map((stat, idx) => (
                   <div key={idx} className="text-center space-y-1">
@@ -676,16 +676,16 @@ export default function App() {
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     {FEATURED_ATHLETES.map((athlete) => (
-                      <div key={athlete.id} className="bg-white border border-zinc-200 p-4 rounded-xl flex items-center space-x-4 shadow-sm hover:shadow-md transition">
+                      <div key={athlete.id} className="bg-white border border-zinc-200 p-4 rounded-xl flex items-center space-x-3 sm:space-x-4 shadow-sm hover:shadow-md transition">
                         <img 
                           src={athlete.image} 
                           alt={athlete.name}
                           className="h-16 w-16 rounded-xl object-cover border border-zinc-200"
                         />
-                        <div>
+                        <div className="min-w-0">
                           <h4 className="font-title text-base font-black uppercase text-zinc-900 leading-tight">{athlete.name}</h4>
                           <span className="block text-[10px] text-red-600 font-bold uppercase tracking-wider">{athlete.sport} • {athlete.level}</span>
-                          <p className="text-[11px] text-zinc-600 font-semibold leading-tight mt-1 truncate max-w-[200px]">{athlete.achievement}</p>
+                          <p className="text-[11px] text-zinc-600 font-semibold leading-tight mt-1 truncate">{athlete.achievement}</p>
                         </div>
                       </div>
                     ))}
@@ -1112,7 +1112,7 @@ export default function App() {
       {loginModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-md animate-fade-in">
           <div 
-            className="w-full max-w-md rounded-3xl border border-zinc-200 bg-white p-6 sm:p-8 space-y-6 shadow-2xl relative"
+            className="w-full max-w-md rounded-3xl border border-zinc-200 bg-white p-5 sm:p-8 space-y-6 shadow-2xl relative max-h-[90vh] overflow-y-auto"
             id="login-modal-box"
           >
             <div className="text-center space-y-2">
@@ -1310,7 +1310,7 @@ export default function App() {
       {/* ==================== EVENT REGISTRATION MODAL ==================== */}
       {eventRegModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-md animate-fade-in">
-          <div className="w-full max-w-md rounded-3xl border border-zinc-200 bg-white p-6 sm:p-8 space-y-6 shadow-2xl relative">
+          <div className="w-full max-w-md rounded-3xl border border-zinc-200 bg-white p-5 sm:p-8 space-y-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
             <div className="text-center space-y-2">
               <div className="h-10 w-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center mx-auto">
                 <Trophy className="h-5 w-5" />

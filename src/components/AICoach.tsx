@@ -88,7 +88,7 @@ export default function AICoach() {
   ];
 
   return (
-    <section className="bg-white py-12 relative min-h-[85vh]">
+    <section className="bg-white py-10 sm:py-12 relative min-h-[85vh]">
       <div className="absolute inset-0 sports-grid-pattern opacity-5 pointer-events-none" />
 
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
@@ -99,7 +99,7 @@ export default function AICoach() {
             <Sparkles className="h-3.5 w-3.5" />
             <span>AI SPORTS STRATEGY ENGINE</span>
           </div>
-          <h2 className="font-display text-4xl sm:text-5xl font-black uppercase text-zinc-900 tracking-wide">
+          <h2 className="font-display text-3xl sm:text-5xl font-black uppercase text-zinc-900 tracking-wide">
             CONSULT <span className="text-red-600">COACH MSA</span>
           </h2>
           <p className="text-zinc-650 text-xs sm:text-sm font-semibold">
@@ -121,10 +121,12 @@ export default function AICoach() {
 
               {/* Sport Selector */}
               <div className="space-y-1.5">
-                <label className="block text-[10px] font-black text-zinc-500 uppercase tracking-widest">
+                <label htmlFor="ai-target-discipline" className="block text-[10px] font-black text-zinc-500 uppercase tracking-widest">
                   Target Discipline
                 </label>
                 <select
+                  id="ai-target-discipline"
+                  title="Target Discipline"
                   className="w-full rounded-xl bg-white border border-zinc-250 hover:border-zinc-400 px-3 py-2.5 text-xs font-bold text-zinc-800 focus:outline-none transition cursor-pointer"
                   value={selectedSport}
                   onChange={(e) => setSelectedSport(e.target.value)}
@@ -142,7 +144,7 @@ export default function AICoach() {
                 <label className="block text-[10px] font-black text-zinc-500 uppercase tracking-widest">
                   Performance Level
                 </label>
-                <div className="grid grid-cols-3 gap-1">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-1">
                   {["Beginner", "Intermediate", "Elite"].map((lvl) => (
                     <button
                       key={lvl}
@@ -197,7 +199,7 @@ export default function AICoach() {
           </div>
 
           {/* Right Column: Dynamic Messaging Chat Area */}
-          <div className="lg:col-span-8 bg-zinc-50 border border-zinc-200 rounded-2xl flex flex-col h-[520px] overflow-hidden shadow-sm">
+          <div className="lg:col-span-8 bg-zinc-50 border border-zinc-200 rounded-2xl flex flex-col h-[68vh] sm:h-130 overflow-hidden shadow-sm">
             
             {/* Chat header */}
             <div className="bg-white px-4 py-3 border-b border-zinc-200 flex items-center justify-between">
@@ -236,7 +238,7 @@ export default function AICoach() {
                   className={`flex ${m.role === "user" ? "justify-end" : "justify-start"} items-start`}
                 >
                   <div
-                    className={`max-w-[85%] rounded-2xl px-4 py-3 text-xs leading-relaxed ${
+                    className={`max-w-[92%] sm:max-w-[85%] rounded-2xl px-4 py-3 text-xs leading-relaxed ${
                       m.role === "user"
                         ? "bg-red-600 text-white font-black shadow-sm"
                         : "bg-white border border-zinc-200 text-zinc-850 font-semibold whitespace-pre-wrap shadow-sm"
@@ -270,7 +272,7 @@ export default function AICoach() {
                     <button
                       key={idx}
                       onClick={() => handleSend(qp.text)}
-                      className="text-[10px] font-bold text-zinc-700 bg-white border border-zinc-200 hover:border-zinc-400 hover:text-zinc-900 px-2.5 py-1 rounded-lg transition text-left truncate max-w-full cursor-pointer shadow-sm"
+                      className="text-[10px] font-bold text-zinc-700 bg-white border border-zinc-200 hover:border-zinc-400 hover:text-zinc-900 px-2.5 py-1 rounded-lg transition text-left max-w-full cursor-pointer shadow-sm"
                     >
                       {qp.label}
                     </button>
@@ -280,7 +282,7 @@ export default function AICoach() {
             )}
 
             {/* Input Bar */}
-            <div className="p-3 bg-white border-t border-zinc-200 flex items-center gap-2">
+            <div className="p-3 bg-white border-t border-zinc-200 flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
               <input
                 type="text"
                 placeholder="Ask about drop shots, heated pool breathing, cardio schedules, stamina mechanics..."
@@ -294,7 +296,9 @@ export default function AICoach() {
               <button
                 onClick={() => handleSend()}
                 disabled={loading || !input.trim()}
-                className="h-10 w-10 shrink-0 bg-red-600 text-white hover:bg-red-700 disabled:bg-zinc-100 disabled:text-zinc-400 rounded-xl flex items-center justify-center transition cursor-pointer shadow-md"
+                title="Send Message"
+                aria-label="Send Message"
+                className="h-10 w-full sm:w-10 shrink-0 bg-red-600 text-white hover:bg-red-700 disabled:bg-zinc-100 disabled:text-zinc-400 rounded-xl flex items-center justify-center transition cursor-pointer shadow-md"
               >
                 <Send className="h-4 w-4" />
               </button>

@@ -2,7 +2,7 @@
 .msa-enquiry-wrapper.open{inset:0}
 
 /* Vertical tab */
-.msa-enquiry-tab{appearance:none;cursor:pointer;background:#b91c1c;color:#fff;border:none;width:62px;height:150px;border-top-left-radius:16px;border-bottom-left-radius:16px;display:flex;align-items:center;justify-content:center;padding:0;box-shadow:0 14px 32px rgba(0,0,0,0.24);position:fixed;top:50%;right:0;transform:translateY(-50%);pointer-events:auto;z-index:1002;user-select:none}
+.msa-enquiry-tab{appearance:none;cursor:pointer;background:#b91c1c;color:#fff;border:none;width:62px;height:150px;border-top-left-radius:16px;border-bottom-left-radius:16px;display:flex;align-items:center;justify-content:center;padding:0;box-shadow:0 14px 32px rgba(0,0,0,0.24);position:fixed;top:50%;right:0;transform:translateY(-50%);pointer-events:auto;z-index:1002;-webkit-user-select:none;user-select:none}
 .msa-enquiry-tab-text{writing-mode:vertical-rl;transform:rotate(180deg);font-weight:900;letter-spacing:1px;text-transform:uppercase;font-size:13px}
 
 /* Panel */
@@ -28,8 +28,16 @@
 .msa-enquiry-success{background:#dcfce7;color:#166534;padding:16px;border-radius:16px;border:1px solid #bbf7d0;font-weight:700;font-size:14px}
 
 @media (max-width:640px){
-	.msa-enquiry-tab{right:12px;top:auto;bottom:20px;transform:none;width:44px;height:110px}
-	.msa-enquiry-panel{width:92vw;left:50%;top:50%;transform:translate(-50%, -50%) scale(1);opacity:1;visibility:visible;min-width:0;padding:18px}
+	.msa-enquiry-tab{right:10px;top:auto;bottom:16px;transform:none;width:42px;height:104px;border-radius:12px}
+	.msa-enquiry-tab-text{font-size:11px;letter-spacing:.7px}
+	.msa-enquiry-panel{width:94vw;max-height:86vh;left:50%;top:50%;min-width:0;padding:16px;border-radius:12px}
+	.msa-enquiry-wrapper.open .msa-enquiry-panel{transform:translate(-50%, -50%) scale(1);opacity:1;visibility:visible}
+	.msa-enquiry-header h3{font-size:22px;line-height:1.1}
+	.msa-enquiry-subtitle{font-size:12px;line-height:1.5}
+	.msa-enquiry-form{gap:12px;max-height:68vh;padding-right:2px}
+	.msa-input,.msa-textarea{padding:12px 14px;font-size:13px;border-radius:14px}
+	.msa-textarea{min-height:96px}
+	.msa-enquiry-submit{padding:14px 16px;border-radius:14px;letter-spacing:.08em}
 }
 
 /* Backdrop when open */

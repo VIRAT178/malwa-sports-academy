@@ -96,7 +96,7 @@ export default function MembershipPlans({ onSelectPlan, onAdmissionsClick }: Mem
         <span className="text-xs font-black text-red-600 uppercase tracking-widest bg-red-50 border border-red-100 px-3 py-1 rounded-full">
           MSA MEMBERSHIPS
         </span>
-        <h1 className="font-display text-4xl sm:text-6xl font-black uppercase text-zinc-900 tracking-tight">
+        <h1 className="font-display text-3xl sm:text-6xl font-black uppercase text-zinc-900 tracking-tight">
           ATHLETIC ENROLLMENT <span className="text-red-600">SCHEMES</span>
         </h1>
         <p className="text-zinc-600 text-sm sm:text-base max-w-2xl mx-auto font-medium leading-relaxed">
@@ -105,10 +105,10 @@ export default function MembershipPlans({ onSelectPlan, onAdmissionsClick }: Mem
 
         {/* Billing period switcher */}
         <div className="pt-4 flex items-center justify-center">
-          <div className="bg-zinc-100 p-1.5 rounded-xl border border-zinc-250 flex items-center gap-1">
+          <div className="bg-zinc-100 p-1.5 rounded-xl border border-zinc-250 flex items-center justify-center gap-1 flex-wrap">
             <button
               onClick={() => setBillingPeriod("monthly")}
-              className={`px-4 py-2 text-xs font-black uppercase tracking-wider rounded-lg transition ${
+              className={`px-3 sm:px-4 py-2 text-[11px] sm:text-xs font-black uppercase tracking-wider rounded-lg transition ${
                 billingPeriod === "monthly" ? "bg-white text-zinc-900 shadow-sm" : "text-zinc-500 hover:text-zinc-800"
               }`}
             >
@@ -116,7 +116,7 @@ export default function MembershipPlans({ onSelectPlan, onAdmissionsClick }: Mem
             </button>
             <button
               onClick={() => setBillingPeriod("quarterly")}
-              className={`px-4 py-2 text-xs font-black uppercase tracking-wider rounded-lg transition flex items-center gap-1.5 ${
+              className={`px-3 sm:px-4 py-2 text-[11px] sm:text-xs font-black uppercase tracking-wider rounded-lg transition flex items-center gap-1.5 ${
                 billingPeriod === "quarterly" ? "bg-white text-zinc-900 shadow-sm" : "text-zinc-500 hover:text-zinc-800"
               }`}
             >
@@ -140,7 +140,7 @@ export default function MembershipPlans({ onSelectPlan, onAdmissionsClick }: Mem
             return (
               <div
                 key={p.id}
-                className={`flex flex-col justify-between rounded-3xl border p-8 bg-white relative transition-all duration-300 ${p.color}`}
+                className={`flex flex-col justify-between rounded-3xl border p-6 sm:p-8 bg-white relative transition-all duration-300 ${p.color}`}
               >
                 {p.popular && (
                   <div className="absolute top-0 right-1/2 translate-x-1/2 -translate-y-1/2 bg-red-600 text-white font-black text-[10px] uppercase tracking-widest px-4 py-1.5 rounded-full shadow-lg border border-red-500">
@@ -224,7 +224,7 @@ export default function MembershipPlans({ onSelectPlan, onAdmissionsClick }: Mem
 
       {/* Scholarship Callout Banner */}
       <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 pt-16 sm:pt-24">
-        <div className="bg-zinc-950 text-white rounded-3xl p-8 sm:p-12 border border-zinc-800 relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-8">
+        <div className="bg-zinc-950 text-white rounded-3xl p-6 sm:p-12 border border-zinc-800 relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
           <div className="absolute top-0 right-0 h-64 w-64 rounded-full bg-red-600/10 blur-3xl pointer-events-none" />
           
           <div className="space-y-4 max-w-xl">
@@ -242,7 +242,7 @@ export default function MembershipPlans({ onSelectPlan, onAdmissionsClick }: Mem
 
           <button
             onClick={onAdmissionsClick}
-            className="bg-white hover:bg-zinc-100 text-zinc-950 font-black text-xs uppercase tracking-widest px-6 py-4 rounded-xl transition shrink-0 shadow-lg flex items-center gap-2 cursor-pointer"
+            className="bg-white hover:bg-zinc-100 text-zinc-950 font-black text-xs uppercase tracking-widest px-6 py-4 rounded-xl transition w-full md:w-auto md:shrink-0 shadow-lg flex items-center justify-center gap-2 cursor-pointer"
           >
             <span>APPLY FOR SCHOLARSHIP TRIALS</span>
             <Trophy className="h-4 w-4 text-red-600" />

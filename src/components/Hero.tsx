@@ -31,7 +31,7 @@ export default function Hero({ onLearnMore, onAdmissionsClick }: HeroProps) {
   const currentSport = SPORTS_PROGRAMS[currentIndex];
 
   return (
-    <section className="relative w-full h-[75vh] sm:h-[80vh] md:h-[85vh] overflow-hidden bg-zinc-950 text-white flex flex-col md:flex-row items-stretch">
+    <section className="relative w-full min-h-[72vh] sm:min-h-[78vh] md:h-[85vh] overflow-hidden bg-zinc-950 text-white flex flex-col md:flex-row items-stretch">
       
       {/* 1. BACKGROUND IMAGE SLIDES - RESPONSIVE PLACEMENT */}
       {/* Mobile/Tablet: Full Bleed | Desktop: Right Split Side */}
@@ -67,8 +67,8 @@ export default function Hero({ onLearnMore, onAdmissionsClick }: HeroProps) {
       <div className="hidden md:block absolute left-[39%] top-0 bottom-0 w-[8%] bg-white transform -skew-x-12 z-20 shadow-[0_0_40px_rgba(255,255,255,0.4)]" />
 
       {/* 3. LEFT TEXT CONTENT COLUMN - RESPONSIBLY TRANSFORMS FROM OVERLAY TO SOLID SIDEBAR */}
-      <div className="relative z-10 w-full md:w-[42%] h-full flex flex-col justify-center px-4 sm:px-6 md:pl-12 md:pr-10 lg:pl-16 lg:pr-12 py-12 md:py-0 bg-black/45 md:bg-zinc-950 shrink-0">
-        <div className="space-y-4 sm:space-y-6 max-w-xl md:max-w-none animate-fade-in">
+      <div className="relative z-10 w-full md:w-[42%] h-full flex flex-col justify-center px-4 sm:px-6 md:pl-12 md:pr-10 lg:pl-16 lg:pr-12 py-14 sm:py-12 md:py-0 bg-black/45 md:bg-zinc-950 shrink-0">
+        <div className="space-y-4 sm:space-y-6 max-w-xl md:max-w-none animate-fade-in pr-2 sm:pr-0">
           
           {/* Subheader Badge */}
           <div className="inline-flex items-center space-x-2 bg-red-600/15 border border-red-500/25 px-3 py-1 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-widest text-red-500 w-fit">
@@ -77,7 +77,7 @@ export default function Hero({ onLearnMore, onAdmissionsClick }: HeroProps) {
           </div>
 
           {/* Heading */}
-          <h1 className="font-sans text-3xl sm:text-5xl md:text-4.5xl lg:text-5.5xl xl:text-6.5xl font-black italic uppercase leading-none tracking-tight drop-shadow-md md:drop-shadow-none">
+          <h1 className="font-sans text-2xl sm:text-5xl md:text-4.5xl lg:text-5.5xl xl:text-6.5xl font-black italic uppercase leading-none tracking-tight drop-shadow-md md:drop-shadow-none">
             {currentSport.tagline.split(" ")[0]} <br />
             <span className="text-red-500">
               {currentSport.tagline.split(" ").slice(1).join(" ")}
@@ -113,7 +113,7 @@ export default function Hero({ onLearnMore, onAdmissionsClick }: HeroProps) {
 
       {/* 4. CONTROLS & PAGINATION */}
       {/* Dots Indicator: Bottom Left */}
-      <div className="absolute bottom-6 left-4 sm:left-8 z-30 flex items-center space-x-2">
+      <div className="absolute bottom-4 left-4 sm:bottom-6 sm:left-8 z-30 flex items-center space-x-2">
         {SPORTS_PROGRAMS.map((sport, idx) => (
           <button
             key={sport.id}
@@ -127,7 +127,7 @@ export default function Hero({ onLearnMore, onAdmissionsClick }: HeroProps) {
       </div>
 
       {/* Arrow Navigation: Bottom Right */}
-      <div className="absolute bottom-6 right-4 sm:right-8 z-30 flex items-center space-x-2">
+      <div className="absolute bottom-4 right-4 sm:bottom-6 sm:right-8 z-30 flex items-center space-x-2">
         <button
           onClick={handlePrev}
           className="p-2.5 rounded-xl bg-black/60 hover:bg-red-600 text-white border border-white/10 hover:border-red-500 transition cursor-pointer"

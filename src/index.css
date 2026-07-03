@@ -9,11 +9,32 @@
 }
 
 @layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html,
+  body,
+  #root {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
   body {
     background-color: #ffffff;
     color: #18181b;
     font-family: var(--font-sans);
     overflow-x: hidden;
+  }
+
+  img,
+  video,
+  canvas,
+  svg {
+    max-width: 100%;
   }
 }
 
@@ -72,5 +93,11 @@
 .sports-grid-pattern {
   background-size: 40px 40px;
   background-image: radial-gradient(circle, rgba(220, 38, 38, 0.05) 1px, transparent 1px);
+}
+
+@media (max-width: 640px) {
+  .sports-grid-pattern {
+    background-size: 28px 28px;
+  }
 }
 

@@ -49,28 +49,28 @@ export default function Navbar({
   return (
     <header className="w-full z-50 flex flex-col bg-white">
       {/* 1. TOP SUB-HEADER BAR - MATCHING VIDEO EXACTLY */}
-      <div className="w-full bg-zinc-900 text-white py-2 px-4 sm:px-6 lg:px-8 border-b border-zinc-800">
-        <div className="mx-auto max-w-7xl flex justify-between items-center text-[10.5px] uppercase font-black tracking-widest">
+      <div className="w-full bg-zinc-900 text-white py-2 px-3 sm:px-6 lg:px-8 border-b border-zinc-800">
+        <div className="mx-auto max-w-7xl flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 text-[9px] sm:text-[10.5px] uppercase font-black tracking-[0.18em] sm:tracking-widest">
           {/* Left info */}
-          <div className="flex items-center space-x-3 text-zinc-400">
-            <span>MALWA SPORTS ACADEMY (MSA)</span>
+          <div className="flex items-center flex-wrap gap-x-2 gap-y-1 text-zinc-400">
+            <span className="leading-none">MALWA SPORTS ACADEMY (MSA)</span>
             <span className="hidden sm:inline text-zinc-600">|</span>
             <span className="hidden sm:inline">INDORE</span>
           </div>
 
           {/* Right action links & social icons */}
-          <div className="flex items-center space-x-5">
+          <div className="flex items-center flex-wrap gap-3 sm:gap-5">
             <button
               onClick={() => handleNavClick("admissions")}
-              className="text-white hover:text-red-500 transition-colors font-black"
+              className="text-white hover:text-red-500 transition-colors font-black text-[9px] sm:text-[10.5px]"
             >
               MEMBERSHIP ENQUIRY
             </button>
 
-            <span className="text-zinc-700">|</span>
+            <span className="text-zinc-700 hidden sm:inline">|</span>
 
             {/* Social Icons matching video */}
-            <div className="flex items-center space-x-2.5">
+            <div className="hidden md:flex items-center space-x-2.5">
               <a href="https://www.instagram.com/malwasportsacademy?igsh=dGZlY3ozaHp4OXM2" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="text-zinc-400 hover:text-red-500 transition-colors">
                 <Instagram className="h-3.5 w-3.5" />
               </a>
@@ -86,10 +86,11 @@ export default function Navbar({
 
             {/* User portal trigger */}
             {currentUser ? (
-              <div className="hidden sm:flex items-center space-x-2">
+              <div className="hidden sm:flex items-center space-x-2 min-w-0">
                 <button
                   onClick={() => handleNavClick("dashboard")}
-                  className="text-red-500 hover:underline font-black"
+                  className="text-red-500 hover:underline font-black truncate max-w-45"
+                  title={`Dashboard (${currentUser.name})`}
                 >
                   DASHBOARD ({currentUser.name.toUpperCase()})
                 </button>
@@ -120,13 +121,13 @@ export default function Navbar({
           {/* BRAND LOGO - MALWA SPORTS ACADEMY (MSA) Logo */}
           <button
             onClick={() => handleNavClick("home")}
-            className="flex items-center focus:outline-none group text-left py-1 select-none"
+            className="flex items-center focus:outline-none group text-left py-1 select-none shrink-0"
             id="nav-logo"
           >
             <img 
               src={logoImg} 
               alt="MSA Logo" 
-              className="h-16 w-auto object-contain group-hover:scale-110 transition-transform duration-300"
+              className="h-14 sm:h-16 w-auto object-contain group-hover:scale-110 transition-transform duration-300"
               referrerPolicy="no-referrer"
             />
           </button>
@@ -353,8 +354,8 @@ export default function Navbar({
 
       {/* MOBILE SLIDE-OUT MENU */}
       {mobileMenuOpen && (
-        <div className="lg:hidden bg-white border-b border-zinc-200 p-4 space-y-4 animate-fade-in shadow-inner max-h-[80vh] overflow-y-auto">
-          <div className="grid grid-cols-2 gap-2">
+        <div className="lg:hidden bg-white border-b border-zinc-200 p-3 sm:p-4 space-y-4 animate-fade-in shadow-inner max-h-[80vh] overflow-y-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             <button
               onClick={() => handleNavClick("home")}
               className="p-3 text-xs font-black uppercase tracking-widest bg-zinc-50 hover:bg-red-50 text-zinc-700 text-center rounded-xl"
@@ -419,7 +420,7 @@ export default function Navbar({
             <span className="block text-zinc-400 text-[10px] font-black uppercase tracking-widest">
               EXPLORE SPORTS
             </span>
-            <div className="grid grid-cols-2 gap-1.5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
               {ALL_CLUB_SPORTS.map((sport) => (
                 <button
                   key={sport.id}
@@ -442,8 +443,9 @@ export default function Navbar({
                 <button
                   onClick={() => handleNavClick("dashboard")}
                   className="flex items-center justify-center space-x-2 w-full p-3 text-xs font-black uppercase tracking-widest bg-red-600 hover:bg-red-700 text-white rounded-xl shadow-sm transition"
+                  title={`Dashboard (${currentUser.name})`}
                 >
-                  <span>DASHBOARD ({currentUser.name.toUpperCase()})</span>
+                  <span className="truncate max-w-full">DASHBOARD ({currentUser.name.toUpperCase()})</span>
                 </button>
                 <button
                   onClick={() => {
