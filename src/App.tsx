@@ -129,6 +129,7 @@ export default function App() {
   // Contact state
   const [contactSubmitted, setContactSubmitted] = useState(false);
   const [contactName, setContactName] = useState("");
+  const [contactEmail, setContactEmail] = useState("");
   const [contactPhone, setContactPhone] = useState("");
   const [contactQuery, setContactQuery] = useState("");
   const [contactSubmitting, setContactSubmitting] = useState(false);
@@ -137,11 +138,15 @@ export default function App() {
   // Event Registration state
   const [eventRegModal, setEventRegModal] = useState<string | null>(null);
   const [eventRegName, setEventRegName] = useState("");
+  const [eventRegEmail, setEventRegEmail] = useState("");
   const [eventRegMobile, setEventRegMobile] = useState("");
   const [eventRegSuccess, setEventRegSuccess] = useState(false);
   const [eventRegSubmitting, setEventRegSubmitting] = useState(false);
   const [eventRegError, setEventRegError] = useState("");
   const [eventRegToken, setEventRegToken] = useState("");
+  const [userEventBooking, setUserEventBooking] = useState<any | null>(null);
+  const [checkingEventBooking, setCheckingEventBooking] = useState(false);
+  const [cancelEventSubmitting, setCancelEventSubmitting] = useState(false);
 
   // Statistics values
   const stats = [
@@ -154,7 +159,7 @@ export default function App() {
   // Contact form submission
   const handleContactSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!contactName.trim() || !contactPhone.trim() || !contactQuery.trim()) return;
+    if (!contactName.trim() || !contactPhone.trim() || !contactEmail.trim() || !contactQuery.trim()) return;
 
     setContactSubmitting(true);
     setContactError("");
@@ -168,6 +173,7 @@ export default function App() {
         body: JSON.stringify({
           name: contactName,
           phone: contactPhone,
+          email: contactEmail,
           query: contactQuery,
         }),
       });
@@ -179,6 +185,7 @@ export default function App() {
 
       setContactSubmitted(true);
       setContactName("");
+      setContactEmail("");
       setContactPhone("");
       setContactQuery("");
       
@@ -196,7 +203,7 @@ export default function App() {
   // Event Registration Submission
   const handleEventRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!eventRegName.trim() || !eventRegMobile.trim() || !eventRegModal) return;
+    if (!eventRegName.trim() || !eventRegMobile.trim() || !eventRegEmail.trim() || !eventRegModal) return;
 
     setEventRegSubmitting(true);
     setEventRegError("");
@@ -211,6 +218,8 @@ export default function App() {
           athleteName: eventRegName,
           eventTitle: eventRegModal,
           mobileNumber: eventRegMobile,
+          email: eventRegEmail,
+          userId: currentUser?._id,
         }),
       });
 
@@ -221,11 +230,95 @@ export default function App() {
 
       setEventRegToken(resData.token);
       setEventRegSuccess(true);
+      setUserEventBooking({
+        token: resData.token,
+        eventTitle: eventRegModal,
+        status: "Pending"
+      });
     } catch (error: any) {
       console.error("Event registration error:", error);
       setEventRegError(error.message || "Failed to reserve seat. Try again.");
     } finally {
       setEventRegSubmitting(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!currentUser?.email && !currentUser?._id) {
+      setUserEventBooking(null);
+      setCheckingEventBooking(false);
+      return;
+    }
+
+    let cancelled = false;
+    const loadBookingStatus = async () => {
+      setCheckingEventBooking(true);
+      try {
+        const params = new URLSearchParams();
+        if (currentUser?.email) params.set("email", currentUser.email);
+        if (currentUser?._id) params.set("userId", currentUser._id);
+
+        const response = await fetch(`${API_BASE}/api/event-registrations/user?${params.toString()}`);
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "Failed to fetch booking status");
+
+        if (!cancelled) {
+          setUserEventBooking(data.activeBooking || null);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setUserEventBooking(null);
+        }
+      } finally {
+        if (!cancelled) {
+          setCheckingEventBooking(false);
+        }
+      }
+    };
+
+    loadBookingStatus();
+    return () => {
+      cancelled = true;
+    };
+  }, [currentUser?._id, currentUser?.email]);
+
+  useEffect(() => {
+    if (currentUser?.name && !eventRegName) {
+      setEventRegName(currentUser.name);
+    }
+    if (currentUser?.email && !eventRegEmail) {
+      setEventRegEmail(currentUser.email);
+    }
+  }, [currentUser, eventRegEmail, eventRegName]);
+
+  const handleCancelEventBooking = async () => {
+    if (!userEventBooking?.token) return;
+
+    setCancelEventSubmitting(true);
+    setEventRegError("");
+    try {
+      const response = await fetch(`${API_BASE}/api/event-register/cancel`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          token: userEventBooking.token,
+          email: currentUser?.email,
+          userId: currentUser?._id,
+        }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Failed to cancel booking");
+
+      setUserEventBooking(null);
+      setEventRegSuccess(false);
+      setEventRegToken("");
+      setEventRegModal(null);
+      alert("Event booking cancelled successfully.");
+    } catch (error: any) {
+      setEventRegError(error.message || "Failed to cancel booking.");
+    } finally {
+      setCancelEventSubmitting(false);
     }
   };
 
@@ -750,9 +843,14 @@ export default function App() {
                       {evt.registrationOpen ? (
                         <button
                           onClick={() => setEventRegModal(evt.title)}
-                          className="bg-red-600 hover:bg-red-700 text-white font-black text-[9px] uppercase tracking-widest px-3.5 py-2 rounded-lg transition shadow-sm"
+                          disabled={!!userEventBooking || checkingEventBooking}
+                          className={`text-white font-black text-[9px] uppercase tracking-widest px-3.5 py-2 rounded-lg transition shadow-sm ${
+                            userEventBooking || checkingEventBooking
+                              ? "bg-zinc-400 cursor-not-allowed"
+                              : "bg-red-600 hover:bg-red-700"
+                          }`}
                         >
-                          Register Slot
+                          {checkingEventBooking ? "Checking..." : userEventBooking ? "Already Booked" : "Register Slot"}
                         </button>
                       ) : (
                         <span className="text-zinc-500 font-black text-[9px] uppercase tracking-widest bg-zinc-100 px-2.5 py-1.5 rounded">
@@ -827,6 +925,14 @@ export default function App() {
                       className="w-full rounded-xl bg-white border border-zinc-250 hover:border-zinc-400 px-4 py-3 text-xs text-zinc-800 focus:outline-none focus:border-red-600 transition"
                       value={contactName}
                       onChange={(e) => setContactName(e.target.value)}
+                    />
+                    <input 
+                      type="email" 
+                      required 
+                      placeholder="Email Address" 
+                      className="w-full rounded-xl bg-white border border-zinc-250 hover:border-zinc-400 px-4 py-3 text-xs text-zinc-800 focus:outline-none focus:border-red-600 transition"
+                      value={contactEmail}
+                      onChange={(e) => setContactEmail(e.target.value)}
                     />
                     <input 
                       type="tel" 
@@ -1044,9 +1150,14 @@ export default function App() {
                     {evt.registrationOpen ? (
                       <button
                         onClick={() => setEventRegModal(evt.title)}
-                        className="w-full bg-red-600 hover:bg-red-700 text-white font-black text-xs uppercase tracking-widest py-3 rounded-xl transition shadow cursor-pointer"
+                        disabled={!!userEventBooking || checkingEventBooking}
+                        className={`w-full text-white font-black text-xs uppercase tracking-widest py-3 rounded-xl transition shadow cursor-pointer ${
+                          userEventBooking || checkingEventBooking
+                            ? "bg-zinc-400 cursor-not-allowed"
+                            : "bg-red-600 hover:bg-red-700"
+                        }`}
                       >
-                        Register Slot Online
+                        {checkingEventBooking ? "Checking..." : userEventBooking ? "Already Booked" : "Register Slot Online"}
                       </button>
                     ) : (
                       <button
@@ -1333,6 +1444,7 @@ export default function App() {
                     setEventRegModal(null);
                     setEventRegSuccess(false);
                     setEventRegName("");
+                    setEventRegEmail("");
                     setEventRegMobile("");
                     setEventRegToken("");
                   }}
@@ -1340,6 +1452,20 @@ export default function App() {
                 >
                   Close Panel
                 </button>
+                {currentUser && (
+                  <button
+                    type="button"
+                    disabled={cancelEventSubmitting}
+                    onClick={handleCancelEventBooking}
+                    className={`w-full rounded-xl border py-2 text-[10px] font-black uppercase tracking-widest transition ${
+                      cancelEventSubmitting
+                        ? "border-zinc-200 bg-zinc-100 text-zinc-400 cursor-not-allowed"
+                        : "border-red-200 bg-red-50 text-red-600 hover:bg-red-100"
+                    }`}
+                  >
+                    {cancelEventSubmitting ? "Cancelling..." : "Cancel Booking"}
+                  </button>
+                )}
               </div>
             ) : (
               <form onSubmit={handleEventRegister} className="space-y-4">
@@ -1371,6 +1497,20 @@ export default function App() {
                   />
                 </div>
 
+                <div className="space-y-1.5">
+                  <label className="block text-[10px] font-black text-zinc-500 uppercase tracking-widest">
+                    Email for Confirmation
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    placeholder="e.g. athlete@email.com"
+                    className="w-full rounded-xl bg-zinc-50 border border-zinc-250 px-4 py-3 text-xs text-zinc-800 focus:outline-none focus:border-red-600"
+                    value={eventRegEmail}
+                    onChange={(e) => setEventRegEmail(e.target.value)}
+                  />
+                </div>
+
                 {eventRegError && (
                   <div className="p-3 bg-red-50 border border-red-200 text-red-600 text-[11px] font-bold rounded-xl">
                     ⚠️ {eventRegError}
@@ -1390,12 +1530,12 @@ export default function App() {
                   </button>
                   <button
                     type="submit"
-                    disabled={eventRegSubmitting}
+                    disabled={eventRegSubmitting || !!userEventBooking}
                     className={`w-1/2 rounded-xl text-white font-black text-xs uppercase tracking-widest py-3 transition cursor-pointer shadow-md ${
-                      eventRegSubmitting ? "bg-red-400 cursor-not-allowed" : "bg-red-600 hover:bg-red-700"
+                      eventRegSubmitting || userEventBooking ? "bg-red-400 cursor-not-allowed" : "bg-red-600 hover:bg-red-700"
                     }`}
                   >
-                    {eventRegSubmitting ? "Reserving..." : "Confirm Seat"}
+                    {eventRegSubmitting ? "Reserving..." : userEventBooking ? "Already Booked" : "Confirm Seat"}
                   </button>
                 </div>
               </form>

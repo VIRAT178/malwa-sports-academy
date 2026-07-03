@@ -105,6 +105,28 @@ export async function sendWelcomeEmail(user: any) {
   });
 }
 
+export async function sendRegistrationAdminAlertEmail(user: any) {
+  const adminEmail = process.env.ADMIN_EMAIL || "admissions@malwasports.com";
+  const adminHtml = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e4e4e7; border-radius: 12px; padding: 24px;">
+      <h2 style="margin-top: 0; color: #dc2626; text-transform: uppercase;">New Portal Registration</h2>
+      <p style="font-size: 14px; color: #4b5563;">A new user account has been registered in the MSA portal.</p>
+      <table style="width: 100%; font-size: 13px; border-collapse: collapse;">
+        <tr><td style="padding: 6px 0; font-weight: bold; color: #6b7280; width: 35%;">Name:</td><td style="padding: 6px 0; font-weight: bold; color: #111827;">${user.name}</td></tr>
+        <tr><td style="padding: 6px 0; font-weight: bold; color: #6b7280;">Email:</td><td style="padding: 6px 0; font-weight: bold; color: #111827;">${user.email}</td></tr>
+        <tr><td style="padding: 6px 0; font-weight: bold; color: #6b7280;">Role:</td><td style="padding: 6px 0; font-weight: bold; color: #dc2626; text-transform: uppercase;">${user.role}</td></tr>
+        <tr><td style="padding: 6px 0; font-weight: bold; color: #6b7280;">Phone:</td><td style="padding: 6px 0; font-weight: bold; color: #111827;">${user.phone || "Not provided"}</td></tr>
+      </table>
+    </div>
+  `;
+
+  await sendEmail({
+    to: adminEmail,
+    subject: `New Portal Registration: ${user.name}`,
+    html: adminHtml,
+  });
+}
+
 // 2. Forgot Password Reset Token
 export async function sendPasswordResetEmail(email: string, resetLink: string) {
   const resetHtml = `
@@ -315,4 +337,134 @@ export async function sendEventRegistrationNotificationEmail(eventData: any) {
       html: userHtml,
     });
   }
+}
+
+export async function sendAdmissionStatusUpdateEmail(admissionData: any) {
+  const adminEmail = process.env.ADMIN_EMAIL || "admissions@malwasports.com";
+
+  const userHtml = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e4e4e7; border-radius: 12px; padding: 24px;">
+      <h2 style="margin-top: 0; color: #dc2626; text-transform: uppercase;">Trial Status Updated</h2>
+      <p>Hello <strong>${admissionData.parentName}</strong>,</p>
+      <p>Your athlete trial status has changed for <strong>${admissionData.athleteName}</strong>.</p>
+      <p><strong>Ticket:</strong> ${admissionData.ticketId}</p>
+      <p><strong>Status:</strong> <span style="color: #dc2626; font-weight: bold; text-transform: uppercase;">${admissionData.status}</span></p>
+    </div>
+  `;
+
+  const adminHtml = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e4e4e7; border-radius: 12px; padding: 24px;">
+      <h2 style="margin-top: 0; color: #dc2626; text-transform: uppercase;">Trial Status Action Logged</h2>
+      <p>An admission status has been updated in the dashboard.</p>
+      <p><strong>Athlete:</strong> ${admissionData.athleteName}</p>
+      <p><strong>Ticket:</strong> ${admissionData.ticketId}</p>
+      <p><strong>Status:</strong> ${admissionData.status}</p>
+    </div>
+  `;
+
+  await sendEmail({
+    to: admissionData.emailAddress,
+    subject: `Trial Status Updated: ${admissionData.status}`,
+    html: userHtml,
+  });
+
+  await sendEmail({
+    to: adminEmail,
+    subject: `Admission Updated: ${admissionData.ticketId} (${admissionData.status})`,
+    html: adminHtml,
+  });
+}
+
+export async function sendEventStatusUpdateEmail(eventData: any) {
+  const adminEmail = process.env.ADMIN_EMAIL || "admissions@malwasports.com";
+
+  const adminHtml = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e4e4e7; border-radius: 12px; padding: 24px;">
+      <h2 style="margin-top: 0; color: #dc2626; text-transform: uppercase;">Event Booking Status Updated</h2>
+      <p><strong>Athlete:</strong> ${eventData.athleteName}</p>
+      <p><strong>Event:</strong> ${eventData.eventTitle}</p>
+      <p><strong>Token:</strong> ${eventData.token}</p>
+      <p><strong>Status:</strong> ${eventData.status}</p>
+    </div>
+  `;
+
+  await sendEmail({
+    to: adminEmail,
+    subject: `Event Status Updated: ${eventData.token} (${eventData.status})`,
+    html: adminHtml,
+  });
+
+  if (!eventData.email) return;
+
+  const userHtml = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e4e4e7; border-radius: 12px; padding: 24px;">
+      <h2 style="margin-top: 0; color: #dc2626; text-transform: uppercase;">Your Event Status Was Updated</h2>
+      <p>Hello <strong>${eventData.athleteName}</strong>, your reservation was updated.</p>
+      <p><strong>Event:</strong> ${eventData.eventTitle}</p>
+      <p><strong>Token:</strong> ${eventData.token}</p>
+      <p><strong>Status:</strong> <span style="color: #dc2626; font-weight: bold; text-transform: uppercase;">${eventData.status}</span></p>
+    </div>
+  `;
+
+  await sendEmail({
+    to: eventData.email,
+    subject: `Event Reservation Status: ${eventData.status}`,
+    html: userHtml,
+  });
+}
+
+export async function sendEventCancellationEmail(eventData: any) {
+  const adminEmail = process.env.ADMIN_EMAIL || "admissions@malwasports.com";
+
+  const adminHtml = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e4e4e7; border-radius: 12px; padding: 24px;">
+      <h2 style="margin-top: 0; color: #dc2626; text-transform: uppercase;">Event Booking Cancelled</h2>
+      <p>A user cancelled their event reservation.</p>
+      <p><strong>Athlete:</strong> ${eventData.athleteName}</p>
+      <p><strong>Event:</strong> ${eventData.eventTitle}</p>
+      <p><strong>Token:</strong> ${eventData.token}</p>
+      <p><strong>Status:</strong> Cancelled</p>
+    </div>
+  `;
+
+  await sendEmail({
+    to: adminEmail,
+    subject: `Event Cancelled: ${eventData.token}`,
+    html: adminHtml,
+  });
+
+  if (!eventData.email) return;
+
+  const userHtml = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e4e4e7; border-radius: 12px; padding: 24px;">
+      <h2 style="margin-top: 0; color: #dc2626; text-transform: uppercase;">Event Booking Cancelled</h2>
+      <p>Hello <strong>${eventData.athleteName}</strong>, your event booking has been cancelled successfully.</p>
+      <p><strong>Event:</strong> ${eventData.eventTitle}</p>
+      <p><strong>Token:</strong> ${eventData.token}</p>
+    </div>
+  `;
+
+  await sendEmail({
+    to: eventData.email,
+    subject: `Event Booking Cancelled: ${eventData.token}`,
+    html: userHtml,
+  });
+}
+
+export async function sendEventDeletedEmail(eventData: any) {
+  const adminEmail = process.env.ADMIN_EMAIL || "admissions@malwasports.com";
+
+  await sendEmail({
+    to: adminEmail,
+    subject: `Event Booking Deleted: ${eventData.token}`,
+    html: `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e4e4e7; border-radius: 12px; padding: 24px;"><h2 style="margin-top: 0; color: #dc2626; text-transform: uppercase;">Event Booking Deleted</h2><p>A booking has been permanently removed from records.</p><p><strong>Athlete:</strong> ${eventData.athleteName}</p><p><strong>Event:</strong> ${eventData.eventTitle}</p><p><strong>Token:</strong> ${eventData.token}</p></div>`,
+  });
+
+  if (!eventData.email) return;
+
+  await sendEmail({
+    to: eventData.email,
+    subject: `Event Booking Removed: ${eventData.token}`,
+    html: `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e4e4e7; border-radius: 12px; padding: 24px;"><h2 style="margin-top: 0; color: #dc2626; text-transform: uppercase;">Event Booking Deleted</h2><p>Hello <strong>${eventData.athleteName}</strong>, your event reservation has been removed from the system by administration.</p><p><strong>Event:</strong> ${eventData.eventTitle}</p><p><strong>Token:</strong> ${eventData.token}</p></div>`,
+  });
 }

@@ -14,12 +14,20 @@ import {
   sendEventRegistrationNotificationEmail,
   sendWelcomeEmail,
   sendPasswordResetEmail,
-  sendEmail
+  sendRegistrationAdminAlertEmail,
+  sendAdmissionStatusUpdateEmail,
+  sendEventStatusUpdateEmail,
+  sendEventCancellationEmail,
+  sendEventDeletedEmail
 } from "./server/mailer";
 
 // Helper for password hashing
 function hashPassword(pwd: string) {
   return crypto.createHash("sha256").update(pwd).digest("hex");
+}
+
+function toLower(value: any) {
+  return typeof value === "string" ? value.trim().toLowerCase() : "";
 }
 
 dotenv.config();
@@ -240,11 +248,12 @@ app.post("/api/auth/register", async (req, res) => {
       savedUser = newUserRecord;
     }
 
-    // Dispatch welcome email
+    // Dispatch user and admin registration emails
     try {
       await sendWelcomeEmail(savedUser);
+      await sendRegistrationAdminAlertEmail(savedUser);
     } catch (mailError: any) {
-      console.error("Failed to dispatch welcome email:", mailError.message);
+      console.error("Failed to dispatch registration emails:", mailError.message);
     }
 
     // Remove password before sending back
@@ -556,27 +565,9 @@ app.post("/api/admissions/action", async (req, res) => {
       return res.status(404).json({ error: "Admission trial record not found." });
     }
 
-    // Send confirmation email of update to parent
+    // Send confirmation emails to user and admin
     try {
-      const mailHtml = `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e4e4e7; border-radius: 12px; padding: 25px;">
-          <h2 style="color: #dc2626; uppercase;">Evaluation Ticket Status Updated</h2>
-          <p>Hello <strong>${targetRecord.parentName}</strong>,</p>
-          <p>The status of the high-performance sports trial for <strong>${targetRecord.athleteName}</strong> has been updated:</p>
-          <div style="background-color: #f9fafb; border: 1px solid #e4e4e7; padding: 15px; border-radius: 8px; margin: 15px 0;">
-            <p><strong>Ticket ID:</strong> ${targetRecord.ticketId}</p>
-            <p><strong>Selected Discipline:</strong> ${targetRecord.selectedSport.toUpperCase()}</p>
-            <p><strong>Trial Date:</strong> ${targetRecord.trialDate}</p>
-            <p><strong>New Status:</strong> <span style="color: #dc2626; font-weight: bold; text-transform: uppercase;">${targetRecord.status}</span></p>
-          </div>
-          <p>If you have any queries, please direct them to admissions@malwasports.com.</p>
-        </div>
-      `;
-      await sendEmail({
-        to: targetRecord.emailAddress,
-        subject: `Trial Request Status: ${targetRecord.status} [Malwa Sports Academy]`,
-        html: mailHtml
-      });
+      await sendAdmissionStatusUpdateEmail(targetRecord);
     } catch (e: any) {
       console.error("Admissions status email error:", e.message);
     }
@@ -700,10 +691,17 @@ app.delete("/api/contacts", async (req, res) => {
 // ==================== EVENT REGISTRATION ENDPOINTS ====================
 app.post("/api/event-register", async (req, res) => {
   try {
-    const { athleteName, eventTitle, mobileNumber, email } = req.body;
+    const { athleteName, eventTitle, mobileNumber, email, userId } = req.body;
 
     if (!athleteName || !eventTitle || !mobileNumber) {
       return res.status(400).json({ error: "Missing required registration parameters" });
+    }
+
+    const normalizedEmail = toLower(email);
+    const normalizedUserId = typeof userId === "string" ? userId.trim() : "";
+
+    if (!normalizedEmail && !normalizedUserId) {
+      return res.status(400).json({ error: "Either account email or userId is required for event booking." });
     }
 
     // Generate reporting token
@@ -712,7 +710,8 @@ app.post("/api/event-register", async (req, res) => {
       athleteName, 
       eventTitle, 
       mobileNumber, 
-      email: email || "", 
+      email: normalizedEmail,
+      userId: normalizedUserId,
       token, 
       status: "Pending", 
       createdAt: new Date() 
@@ -720,9 +719,38 @@ app.post("/api/event-register", async (req, res) => {
 
     const dbConnected = mongoose.connection.readyState === 1;
     if (dbConnected) {
+      const duplicate = await EventRegistration.findOne({
+        status: { $in: ["Pending", "Accepted"] },
+        $or: [
+          ...(normalizedEmail ? [{ email: normalizedEmail }] : []),
+          ...(normalizedUserId ? [{ userId: normalizedUserId }] : [])
+        ]
+      });
+
+      if (duplicate) {
+        return res.status(409).json({
+          error: "You already have an active event booking. Cancel the existing booking before registering again.",
+          existingToken: duplicate.token
+        });
+      }
+
       const eventReg = new EventRegistration(eventRecord);
       await eventReg.save();
     } else {
+      const duplicate = inMemoryDb.events.find((e) => {
+        const active = e.status === "Pending" || e.status === "Accepted";
+        const sameEmail = normalizedEmail && toLower(e.email) === normalizedEmail;
+        const sameUser = normalizedUserId && e.userId === normalizedUserId;
+        return active && (sameEmail || sameUser);
+      });
+
+      if (duplicate) {
+        return res.status(409).json({
+          error: "You already have an active event booking. Cancel the existing booking before registering again.",
+          existingToken: duplicate.token
+        });
+      }
+
       inMemoryDb.events.push(eventRecord);
     }
 
@@ -751,6 +779,51 @@ app.get("/api/event-registrations", async (req, res) => {
     }
   } catch (error: any) {
     res.status(500).json({ error: "Failed to fetch event bookings: " + error.message });
+  }
+});
+
+app.get("/api/event-registrations/user", async (req, res) => {
+  try {
+    const email = toLower(req.query.email);
+    const userId = typeof req.query.userId === "string" ? req.query.userId.trim() : "";
+
+    if (!email && !userId) {
+      return res.status(400).json({ error: "Email or userId is required." });
+    }
+
+    const isActive = (status: string) => status === "Pending" || status === "Accepted";
+    const dbConnected = mongoose.connection.readyState === 1;
+
+    if (dbConnected) {
+      const filters: any[] = [];
+      if (email) filters.push({ email });
+      if (userId) filters.push({ userId });
+
+      const records = await EventRegistration.find({ $or: filters }).sort({ createdAt: -1 });
+      const activeBooking = records.find((r: any) => isActive(r.status));
+
+      return res.json({
+        success: true,
+        hasActiveBooking: !!activeBooking,
+        activeBooking: activeBooking || null,
+        bookings: records
+      });
+    }
+
+    const records = inMemoryDb.events
+      .filter((e) => (email && toLower(e.email) === email) || (userId && e.userId === userId))
+      .sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt));
+
+    const activeBooking = records.find((r) => isActive(r.status));
+
+    return res.json({
+      success: true,
+      hasActiveBooking: !!activeBooking,
+      activeBooking: activeBooking || null,
+      bookings: records
+    });
+  } catch (error: any) {
+    res.status(500).json({ error: "Failed to fetch user event bookings: " + error.message });
   }
 });
 
@@ -784,35 +857,116 @@ app.post("/api/event-register/action", async (req, res) => {
       return res.status(404).json({ error: "Event registration record not found." });
     }
 
-    // Dispatch SMTP notification if athlete email is available
-    if (targetRecord.email) {
-      try {
-        const mailHtml = `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e4e4e7; border-radius: 12px; padding: 25px;">
-            <h2 style="color: #dc2626; text-transform: uppercase;">Event Seat Clearance Update</h2>
-            <p>Hello <strong>${targetRecord.athleteName}</strong>,</p>
-            <p>Your seat booking status for the event <strong>${targetRecord.eventTitle}</strong> has been updated:</p>
-            <div style="background-color: #f9fafb; border: 1px solid #e4e4e7; padding: 15px; border-radius: 8px; margin: 15px 0;">
-              <p><strong>Tracking Code:</strong> ${targetRecord.token}</p>
-              <p><strong>Event:</strong> ${targetRecord.eventTitle}</p>
-              <p><strong>New Status:</strong> <span style="color: #dc2626; font-weight: bold; text-transform: uppercase;">${targetRecord.status}</span></p>
-            </div>
-            <p>Please present your updated token dashboard profile at the active sports wing gates.</p>
-          </div>
-        `;
-        await sendEmail({
-          to: targetRecord.email,
-          subject: `Event Reservation Status: ${targetRecord.status} [Malwa Sports Academy]`,
-          html: mailHtml
-        });
-      } catch (e: any) {
-        console.error("Event update email notification fail:", e.message);
-      }
+    try {
+      await sendEventStatusUpdateEmail(targetRecord);
+    } catch (e: any) {
+      console.error("Event update email notification fail:", e.message);
     }
 
     res.json({ success: true, data: targetRecord });
   } catch (error: any) {
     res.status(500).json({ error: "Failed to update event status: " + error.message });
+  }
+});
+
+app.post("/api/event-register/cancel", async (req, res) => {
+  try {
+    const { token, email, userId } = req.body || {};
+    if (!token) {
+      return res.status(400).json({ error: "Missing tracking token." });
+    }
+
+    const normalizedEmail = toLower(email);
+    const normalizedUserId = typeof userId === "string" ? userId.trim() : "";
+    if (!normalizedEmail && !normalizedUserId) {
+      return res.status(400).json({ error: "Email or userId is required to cancel booking." });
+    }
+
+    const dbConnected = mongoose.connection.readyState === 1;
+    let targetRecord: any = null;
+
+    if (dbConnected) {
+      const record = await EventRegistration.findOne({ token });
+      if (!record) {
+        return res.status(404).json({ error: "Event registration record not found." });
+      }
+
+      const ownerMatch = (normalizedEmail && toLower(record.email) === normalizedEmail)
+        || (normalizedUserId && record.userId === normalizedUserId);
+
+      if (!ownerMatch) {
+        return res.status(403).json({ error: "Booking can only be cancelled by the owner." });
+      }
+
+      record.status = "Cancelled";
+      await record.save();
+      targetRecord = record.toObject();
+    } else {
+      const idx = inMemoryDb.events.findIndex((e) => e.token === token);
+      if (idx === -1) {
+        return res.status(404).json({ error: "Event registration record not found." });
+      }
+
+      const record = inMemoryDb.events[idx];
+      const ownerMatch = (normalizedEmail && toLower(record.email) === normalizedEmail)
+        || (normalizedUserId && record.userId === normalizedUserId);
+
+      if (!ownerMatch) {
+        return res.status(403).json({ error: "Booking can only be cancelled by the owner." });
+      }
+
+      inMemoryDb.events[idx].status = "Cancelled";
+      targetRecord = inMemoryDb.events[idx];
+    }
+
+    try {
+      await sendEventCancellationEmail(targetRecord);
+    } catch (mailError: any) {
+      console.error("Failed to dispatch event cancellation email:", mailError.message);
+    }
+
+    res.json({ success: true, data: targetRecord });
+  } catch (error: any) {
+    res.status(500).json({ error: "Failed to cancel event booking: " + error.message });
+  }
+});
+
+app.delete("/api/event-registrations/:token", async (req, res) => {
+  try {
+    const token = req.params.token;
+    if (!token) {
+      return res.status(400).json({ error: "Missing tracking token." });
+    }
+
+    const dbConnected = mongoose.connection.readyState === 1;
+    let deletedRecord: any = null;
+
+    if (dbConnected) {
+      deletedRecord = await EventRegistration.findOneAndDelete({ token });
+      if (deletedRecord) {
+        deletedRecord = deletedRecord.toObject();
+      }
+    } else {
+      const idx = inMemoryDb.events.findIndex((e) => e.token === token);
+      if (idx !== -1) {
+        deletedRecord = inMemoryDb.events[idx];
+        inMemoryDb.events.splice(idx, 1);
+      }
+    }
+
+    if (!deletedRecord) {
+      return res.status(404).json({ error: "Event registration record not found." });
+    }
+
+    try {
+      await sendEventDeletedEmail(deletedRecord);
+    } catch (mailError: any) {
+      console.error("Failed to dispatch event deletion email:", mailError.message);
+    }
+
+    res.json({ success: true, data: deletedRecord, dbPersisted: dbConnected });
+  } catch (error: any) {
+    res.status(500).json({ error: "Failed to delete event booking: " + error.message });
   }
 });
 

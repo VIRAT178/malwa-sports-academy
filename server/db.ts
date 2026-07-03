@@ -105,8 +105,10 @@ const EventRegistrationSchema = new mongoose.Schema({
   athleteName: { type: String, required: true },
   eventTitle: { type: String, required: true },
   mobileNumber: { type: String, required: true },
+  email: { type: String, default: "", lowercase: true },
+  userId: { type: String, default: "" },
   token: { type: String, required: true },
-  status: { type: String, enum: ["Pending", "Accepted", "Denied"], default: "Pending" },
+  status: { type: String, enum: ["Pending", "Accepted", "Denied", "Cancelled"], default: "Pending" },
   createdAt: { type: Date, default: Date.now }
 });
 

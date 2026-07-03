@@ -153,6 +153,23 @@ export default function Dashboard({ initialRole, currentUser, onProfileUpdate }:
     }
   };
 
+  const handleEventDelete = async (token: string) => {
+    const confirmed = window.confirm("Delete this event booking permanently?");
+    if (!confirmed) return;
+
+    try {
+      const res = await fetch(`${API_BASE}/api/event-registrations/${encodeURIComponent(token)}`, {
+        method: "DELETE"
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to delete booking");
+
+      setEvents(prev => prev.filter(e => e.token !== token));
+    } catch (error: any) {
+      alert("Unable to delete booking: " + (error.message || "Unknown error"));
+    }
+  };
+
   // Handle Contact Inquiry Deletion
   const handleContactDelete = async (contact: any) => {
     const confirmed = window.confirm("Delete this inquiry from admin inbox?");
@@ -533,6 +550,12 @@ export default function Dashboard({ initialRole, currentUser, onProfileUpdate }:
                                     }`}
                                   >
                                     <XCircle className="h-3.5 w-3.5" /> Deny Spectator
+                                  </button>
+                                  <button
+                                    onClick={() => handleEventDelete(evt.token)}
+                                    className="px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider flex items-center gap-1 transition bg-zinc-900 hover:bg-zinc-800 text-white shadow-sm cursor-pointer"
+                                  >
+                                    <Trash2 className="h-3.5 w-3.5" /> Delete
                                   </button>
                                 </div>
                               </div>
@@ -1060,6 +1083,101 @@ export default function Dashboard({ initialRole, currentUser, onProfileUpdate }:
 
                 </div>
               </>
+            )}
+          </div>
+        )}
+
+        {/* EVENT BOOKINGS MANAGEMENT - STUDENT & PARENT VIEW */}
+        {(activeRole === "student" || activeRole === "parent") && (
+          <div className="rounded-2xl border border-zinc-200 bg-white p-6 space-y-4 shadow-sm">
+            <div className="flex items-center justify-between border-b border-zinc-200 pb-4">
+              <h3 className="font-title text-lg font-black uppercase text-zinc-900 flex items-center gap-1.5">
+                <Trophy className="h-5 w-5 text-red-600" />
+                <span>My Event Bookings</span>
+              </h3>
+              <button onClick={fetchAdminData} className="flex items-center gap-1 text-red-600 hover:underline text-xs font-black">
+                <RefreshCw className="h-3 w-3" /> Refresh
+              </button>
+            </div>
+
+            {loadingAdminData ? (
+              <div className="py-6 text-center text-zinc-500 font-black flex items-center justify-center gap-2 animate-pulse text-xs uppercase">
+                <RefreshCw className="h-4 w-4 animate-spin text-red-600" />
+                Loading bookings...
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {events.length === 0 ? (
+                  <p className="text-xs text-zinc-500 font-bold py-6 text-center">No event bookings found. Visit the Events page to register.</p>
+                ) : (
+                  <div className="space-y-3 max-h-96 overflow-y-auto">
+                    {events
+                      .filter((evt) => {
+                        const isOwner = (currentUser?.email && evt.email?.toLowerCase() === currentUser.email.toLowerCase())
+                          || (currentUser?._id && evt.userId === currentUser._id);
+                        return isOwner;
+                      })
+                      .map((evt) => (
+                        <div key={evt.token} className="p-4 rounded-xl border border-zinc-200 bg-zinc-50 space-y-3 text-xs font-bold text-zinc-700 shadow-sm hover:border-zinc-300 transition-colors">
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-zinc-200 pb-2">
+                            <div>
+                              <span className="text-zinc-400 text-[10px] uppercase font-black block">EVENT BOOKING</span>
+                              <span className="font-black text-zinc-900 text-sm">{evt.eventTitle}</span>
+                            </div>
+                            <span className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider self-start sm:self-center ${
+                              evt.status === "Accepted" ? "bg-green-100 text-green-700" :
+                              evt.status === "Denied" ? "bg-red-100 text-red-700" :
+                              evt.status === "Cancelled" ? "bg-zinc-100 text-zinc-700" : "bg-yellow-100 text-yellow-700 animate-pulse"
+                            }`}>
+                              {evt.status || "Pending"}
+                            </span>
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
+                            <p><span className="text-zinc-400 uppercase font-bold">Booking Token:</span> <span className="font-mono text-zinc-800 font-black">{evt.token}</span></p>
+                            <p><span className="text-zinc-400 uppercase font-bold">Mobile Registered:</span> <span className="font-black text-zinc-800">{evt.mobileNumber}</span></p>
+                          </div>
+
+                          {evt.status !== "Denied" && evt.status !== "Cancelled" && (
+                            <div className="flex gap-2 pt-2 border-t border-zinc-200">
+                              <button
+                                onClick={async () => {
+                                  if (window.confirm("Cancel this event booking?")) {
+                                    try {
+                                      const res = await fetch(`${API_BASE}/api/event-register/cancel`, {
+                                        method: "POST",
+                                        headers: { "Content-Type": "application/json" },
+                                        body: JSON.stringify({
+                                          token: evt.token,
+                                          email: currentUser?.email,
+                                          userId: currentUser?._id
+                                        })
+                                      });
+                                      if (!res.ok) throw new Error("Failed to cancel");
+                                      fetchAdminData();
+                                    } catch (error: any) {
+                                      alert("Unable to cancel: " + error.message);
+                                    }
+                                  }
+                                }}
+                                className="px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider flex items-center gap-1 transition bg-red-100 hover:bg-red-200 text-red-600 shadow-sm cursor-pointer"
+                              >
+                                <XCircle className="h-3.5 w-3.5" /> Cancel Booking
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    {events.filter((evt) => {
+                      const isOwner = (currentUser?.email && evt.email?.toLowerCase() === currentUser.email.toLowerCase())
+                        || (currentUser?._id && evt.userId === currentUser._id);
+                      return isOwner;
+                    }).length === 0 && (
+                      <p className="text-xs text-zinc-500 font-bold py-4 text-center">No bookings under your account.</p>
+                    )}
+                  </div>
+                )}
+              </div>
             )}
           </div>
         )}
