@@ -14,12 +14,21 @@ interface DashboardProps {
 }
 
 export default function Dashboard({ initialRole, currentUser, onProfileUpdate }: DashboardProps) {
-  const [activeRole, setActiveRole] = useState<"admin" | "coach" | "student" | "parent">(initialRole);
+  const normalizeRole = (role: any): "admin" | "coach" | "student" | "parent" => {
+    if (role === "admin" || role === "coach" || role === "student" || role === "parent") {
+      return role;
+    }
+    return "student";
+  };
 
-  // Sync role state with login role when user logs in/changes role
+  const [activeRole, setActiveRole] = useState<"admin" | "coach" | "student" | "parent">(
+    normalizeRole(currentUser?.role ?? initialRole)
+  );
+
+  // Sync role state with authenticated role whenever auth data changes
   useEffect(() => {
-    setActiveRole(initialRole);
-  }, [initialRole]);
+    setActiveRole(normalizeRole(currentUser?.role ?? initialRole));
+  }, [initialRole, currentUser?.role]);
 
   // Admin Data states
   const [admissions, setAdmissions] = useState<any[]>([]);
@@ -245,24 +254,12 @@ export default function Dashboard({ initialRole, currentUser, onProfileUpdate }:
             )}
           </div>
 
-          {/* Dynamic Switcher */}
-          <div className="flex bg-zinc-100 p-1.5 rounded-xl border border-zinc-200 gap-1 self-start shadow-sm">
-            {(["admin", "coach", "student", "parent"] as const).map((role) => (
-              <button
-                key={role}
-                onClick={() => {
-                  setActiveRole(role);
-                  setProfileMode(false);
-                }}
-                className={`px-4 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all cursor-pointer ${
-                  activeRole === role
-                    ? "bg-red-600 text-white shadow"
-                    : "text-zinc-500 hover:text-zinc-900"
-                }`}
-              >
-                {role}
-              </button>
-            ))}
+          {/* Role lock indicator */}
+          <div className="self-start rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-2 shadow-sm">
+            <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Dashboard Access</p>
+            <p className="text-xs font-black uppercase tracking-widest text-red-600">
+              {activeRole} role only
+            </p>
           </div>
         </div>
 

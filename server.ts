@@ -593,11 +593,24 @@ app.post("/api/contact", async (req, res) => {
   try {
     const { name, phone, query, email, course } = req.body;
 
-    if (!name || !phone || !query) {
-      return res.status(400).json({ error: "Missing name, phone, or query text" });
+    if (!name || !phone) {
+      return res.status(400).json({ error: "Missing name or phone" });
     }
 
-    const contactRecord = { name, phone, query, email: email || "", course: course || "", createdAt: new Date() };
+    const sanitizedCourse = typeof course === "string" ? course.trim() : "";
+    const sanitizedQuery = typeof query === "string" ? query.trim() : "";
+    const fallbackQuery = sanitizedCourse
+      ? `General enquiry for ${sanitizedCourse}`
+      : "General admissions enquiry";
+
+    const contactRecord = {
+      name: String(name).trim(),
+      phone: String(phone).trim(),
+      query: sanitizedQuery || fallbackQuery,
+      email: typeof email === "string" ? email.trim() : "",
+      course: sanitizedCourse,
+      createdAt: new Date()
+    };
     const dbConnected = mongoose.connection.readyState === 1;
 
     if (dbConnected) {

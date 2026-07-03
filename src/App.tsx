@@ -424,14 +424,14 @@ export default function App() {
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
-                  "/src/assets/images/academy_building_1782710611155.jpg",
-                  "/src/assets/images/cricket_athlete_1782710625811.jpg",
-                  "/src/assets/images/football_athlete_1782710639879.jpg",
-                  "/src/assets/images/basketball_athlete_1782710652463.jpg",
-                  "/src/assets/images/swimming_pool_1782710679951.jpg",
-                  "/src/assets/images/shooting_range_1782710691800.jpg",
-                  "/src/assets/images/gym.jpg",
-                  "/src/assets/images/badminton_player_1782710729529.jpg"
+                  "/src/assets/images/academy_building.jpg",
+                  "/src/assets/images/athletics.jpg",
+                  "/src/assets/images/badminton.jpg",
+                  "/src/assets/images/basketball.jpg",
+                  "/src/assets/images/carrom.jpg",
+                  "/src/assets/images/cricket.jpg",
+                  "/src/assets/images/kabaddi.jpg",
+                  "/src/assets/images/shooting.jpg"
                 ].map((img, idx) => (
                   <div key={idx} className="h-44 sm:h-56 rounded-xl overflow-hidden border border-zinc-200 bg-zinc-100 group shadow-sm">
                     <img 

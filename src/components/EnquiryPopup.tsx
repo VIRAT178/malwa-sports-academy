@@ -46,20 +46,27 @@ export default function EnquiryPopup() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    if (!name.trim() || !phone.trim() || !message.trim()) {
-      setError("Please complete your name, phone, and message.");
+    if (!name.trim() || !phone.trim() || !email.trim()) {
+      setError("Please complete your name, email, and phone.");
       return;
     }
 
     setSubmitting(true);
     try {
+      const normalizedQuery = message.trim() || `General enquiry for ${course || "admissions"}`;
       const res = await fetch(`${API_BASE}/api/contact`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, phone, query: message, email, course }),
+        body: JSON.stringify({
+          name: name.trim(),
+          phone: phone.trim(),
+          query: normalizedQuery,
+          email: email.trim(),
+          course: course.trim()
+        }),
       });
 
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || "Failed to send enquiry");
 
       setSuccess(true);
