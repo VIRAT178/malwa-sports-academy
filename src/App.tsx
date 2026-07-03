@@ -15,6 +15,14 @@ import { API_BASE } from "./config";
 import { 
   SPORTS_PROGRAMS, COACHES, FEATURED_ATHLETES, UPCOMING_EVENTS, ACHIEVEMENTS, TESTIMONIALS, FACILITIES, logoImg 
 } from "./data";
+import academyBuildingImg from "./assets/images/academy_building.jpg";
+import athleticsImg from "./assets/images/athletics.jpg";
+import badmintonImg from "./assets/images/badminton.jpg";
+import basketballImg from "./assets/images/basketball.jpg";
+import carromImg from "./assets/images/carrom.jpg";
+import cricketImg from "./assets/images/cricket.jpg";
+import kabaddiImg from "./assets/images/kabaddi.jpg";
+import shootingImg from "./assets/images/shooting.jpg";
 import { getSportIcon } from "./types";
 import { 
   Trophy, Shield, MapPin, Users, Award, Star, Mail, Phone, Clock, Sparkles, Send, Eye, LogIn, ChevronRight, CheckCircle2 
@@ -517,14 +525,14 @@ export default function App() {
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
-                  "/src/assets/images/academy_building.jpg",
-                  "/src/assets/images/athletics.jpg",
-                  "/src/assets/images/badminton.jpg",
-                  "/src/assets/images/basketball.jpg",
-                  "/src/assets/images/carrom.jpg",
-                  "/src/assets/images/cricket.jpg",
-                  "/src/assets/images/kabaddi.jpg",
-                  "/src/assets/images/shooting.jpg"
+                  academyBuildingImg,
+                  athleticsImg,
+                  badmintonImg,
+                  basketballImg,
+                  carromImg,
+                  cricketImg,
+                  kabaddiImg,
+                  shootingImg
                 ].map((img, idx) => (
                   <div key={idx} className="h-44 sm:h-56 rounded-xl overflow-hidden border border-zinc-200 bg-zinc-100 group shadow-sm">
                     <img 
