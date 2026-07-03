@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { 
   Users, Award, Trophy, ShieldAlert, Plus, Send, CheckCircle2, Clock, 
   TrendingUp, Calendar, AlertTriangle, Bell, UserCheck, Flame, Zap, Heart, Sparkles,
-  CheckCircle, XCircle, RefreshCw, Mail, Phone, Edit3, Save, Shield
+  CheckCircle, XCircle, RefreshCw, Mail, Phone, Edit3, Save, Shield, Trash2
 } from "lucide-react";
 import { SPORTS_PROGRAMS, COACHES, FEATURED_ATHLETES } from "../data";
 import { API_BASE } from "../config";
@@ -150,6 +150,41 @@ export default function Dashboard({ initialRole, currentUser, onProfileUpdate }:
       setEvents(prev => prev.map(e => e.token === token ? { ...e, status } : e));
     } catch (error: any) {
       alert("Error processing event approval: " + error.message);
+    }
+  };
+
+  // Handle Contact Inquiry Deletion
+  const handleContactDelete = async (contact: any) => {
+    const confirmed = window.confirm("Delete this inquiry from admin inbox?");
+    if (!confirmed) return;
+
+    try {
+      const res = await fetch(`${API_BASE}/api/contacts`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: contact?._id,
+          name: contact?.name,
+          phone: contact?.phone,
+          query: contact?.query,
+          createdAt: contact?.createdAt
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to delete inquiry");
+
+      setContacts((prev) => prev.filter((c) => {
+        if (contact?._id) return c._id !== contact._id;
+        return !(
+          c.name === contact?.name &&
+          c.phone === contact?.phone &&
+          c.query === contact?.query &&
+          String(c.createdAt) === String(contact?.createdAt)
+        );
+      }));
+    } catch (error: any) {
+      alert("Unable to delete inquiry: " + (error.message || "Unknown error"));
     }
   };
 
@@ -523,12 +558,22 @@ export default function Dashboard({ initialRole, currentUser, onProfileUpdate }:
                           <div className="space-y-3 max-h-[500px] overflow-y-auto pr-1">
                             {contacts.map((c, idx) => (
                               <div key={idx} className="p-4 rounded-xl border border-zinc-200 bg-zinc-50 space-y-2 text-xs font-bold text-zinc-700 shadow-sm">
-                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-zinc-200 pb-2">
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-zinc-200 pb-2">
                                   <div>
                                     <span className="text-zinc-400 text-[10px] uppercase font-black block">VISITOR INQUIRY</span>
                                     <span className="font-black text-zinc-900 text-sm">{c.name}</span>
                                   </div>
-                                  <span className="text-[10px] text-zinc-500 font-medium">Logged: {new Date(c.createdAt).toLocaleString()}</span>
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-[10px] text-zinc-500 font-medium">Logged: {new Date(c.createdAt).toLocaleString()}</span>
+                                    <button
+                                      onClick={() => handleContactDelete(c)}
+                                      className="inline-flex items-center gap-1 rounded-lg border border-red-200 bg-red-50 px-2 py-1 text-[10px] font-black uppercase tracking-wider text-red-600 hover:bg-red-100 transition"
+                                      title="Delete inquiry"
+                                    >
+                                      <Trash2 className="h-3 w-3" />
+                                      Delete
+                                    </button>
+                                  </div>
                                 </div>
 
                                 <p className="bg-white p-3 rounded-xl border border-zinc-200 text-zinc-850 font-medium text-xs leading-relaxed italic">

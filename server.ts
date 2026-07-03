@@ -648,6 +648,54 @@ app.get("/api/contacts", async (req, res) => {
   }
 });
 
+app.delete("/api/contacts", async (req, res) => {
+  try {
+    const { id, name, phone, query, createdAt } = req.body || {};
+    const dbConnected = mongoose.connection.readyState === 1;
+
+    if (dbConnected) {
+      let deleted: any = null;
+
+      if (id) {
+        deleted = await Contact.findByIdAndDelete(id);
+      }
+
+      if (!deleted && name && phone && query && createdAt) {
+        deleted = await Contact.findOneAndDelete({
+          name,
+          phone,
+          query,
+          createdAt: new Date(createdAt)
+        });
+      }
+
+      if (!deleted) {
+        return res.status(404).json({ error: "Contact inquiry not found" });
+      }
+
+      return res.json({ success: true, source: "mongodb" });
+    }
+
+    const index = inMemoryDb.contacts.findIndex((c) => {
+      return (
+        c.name === name &&
+        c.phone === phone &&
+        c.query === query &&
+        String(c.createdAt) === String(createdAt)
+      );
+    });
+
+    if (index === -1) {
+      return res.status(404).json({ error: "Contact inquiry not found" });
+    }
+
+    inMemoryDb.contacts.splice(index, 1);
+    return res.json({ success: true, source: "memory" });
+  } catch (error: any) {
+    res.status(500).json({ error: "Failed to delete contact inquiry: " + error.message });
+  }
+});
+
 
 // ==================== EVENT REGISTRATION ENDPOINTS ====================
 app.post("/api/event-register", async (req, res) => {
