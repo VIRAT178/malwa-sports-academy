@@ -1,0 +1,6 @@
+{
+  "name": "Malwa Sports Academy",
+  "description": "Official premium digital platform for Malwa Sports Academy (MSA) in Indore, showcasing elite sports programs, facilities, achievements, event registrations, parent/coach/athlete dashboards, and an interactive AI Coach.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

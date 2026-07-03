@@ -1,0 +1,76 @@
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Anton&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-display: 'Bebas Neue', sans-serif;
+  --font-title: 'Oswald', sans-serif;
+  --font-alt: 'Anton', sans-serif;
+}
+
+@layer base {
+  body {
+    background-color: #ffffff;
+    color: #18181b;
+    font-family: var(--font-sans);
+    overflow-x: hidden;
+  }
+}
+
+/* Custom Sports Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #f4f4f5;
+}
+::-webkit-scrollbar-thumb {
+  background: #dc2626;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #b91c1c;
+}
+
+/* Float animations */
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+@keyframes float-delayed {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+  100% { transform: translateY(0px); }
+}
+
+@keyframes loader-bar {
+  0% { width: 0%; left: 0%; }
+  50% { width: 70%; left: 15%; }
+  100% { width: 100%; left: 0%; }
+}
+
+.animate-loader-bar {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  height: 100%;
+  animation: loader-bar 2.2s ease-in-out infinite;
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+.animate-float-delayed {
+  animation: float-delayed 5s ease-in-out infinite 1s;
+}
+
+/* Particle dots background */
+.sports-grid-pattern {
+  background-size: 40px 40px;
+  background-image: radial-gradient(circle, rgba(220, 38, 38, 0.05) 1px, transparent 1px);
+}
+
