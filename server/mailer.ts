@@ -8,36 +8,59 @@ interface EmailPayload {
 
 let transporter: nodemailer.Transporter | null = null;
 
-function normalizeSmtpHost(host: string | undefined, user: string | undefined) {
-  const trimmedHost = host?.trim();
+/**
+ * Send email via Brevo REST API (preferred for cloud environments)
+ */
+async function sendViaBrevoAPI({ to, subject, html }: EmailPayload) {
+  const apiKey = process.env.BREVO_API_KEY;
+  const from = process.env.SMTP_FROM || '"Malwa Sports Academy" <no-reply@malwasports.com>';
 
-  if (!trimmedHost) {
-    if (user?.includes("@")) {
-      const domain = user.split("@")[1];
-      return domain ? `smtp.${domain}` : undefined;
+  if (!apiKey) {
+    return null; // API key not available, try SMTP fallback
+  }
+
+  try {
+    const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: {
+        "api-key": apiKey,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        sender: { email: from.includes("<") ? from.split("<")[1].replace(">", "") : from, name: from.includes('"') ? from.split('"')[1] : "Malwa Sports Academy" },
+        to: [{ email: to }],
+        subject,
+        htmlContent: html,
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(`Brevo API error: ${error.message || response.statusText}`);
     }
-    return undefined;
-  }
 
-  if (trimmedHost.includes("@")) {
-    const domain = trimmedHost.split("@")[1];
-    return domain ? (domain.startsWith("smtp.") ? domain : `smtp.${domain}`) : undefined;
+    const data: any = await response.json();
+    console.log(`📨 Email successfully dispatched via Brevo API. Message ID: ${data.messageId}`);
+    return { success: true, messageId: data.messageId, provider: "brevo-api" };
+  } catch (error: any) {
+    console.error("⚠️ Brevo API failed, falling back to SMTP:", error.message);
+    return null;
   }
-
-  return trimmedHost;
 }
 
+/**
+ * Send email via nodemailer SMTP (fallback for local development)
+ */
 function getTransporter() {
   if (transporter) return transporter;
 
   const user = process.env.SMTP_USER?.trim();
   const pass = process.env.SMTP_PASS?.trim();
-  const configuredHost = process.env.SMTP_HOST?.trim();
-  const host = normalizeSmtpHost(configuredHost, user);
+  const host = process.env.SMTP_HOST?.trim();
   const port = process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT) : 587;
 
   if (!host || !user || !pass) {
-    console.warn("⚠️ SMTP environment variables (SMTP_HOST, SMTP_USER, SMTP_PASS) are not defined. Outgoing emails will be logged to console in Simulation Mode.");
+    console.warn("⚠️ SMTP environment variables not defined. Email Simulation Mode enabled.");
     return null;
   }
 
@@ -46,10 +69,7 @@ function getTransporter() {
       host,
       port,
       secure: port === 465,
-      auth: {
-        user,
-        pass,
-      },
+      auth: { user, pass },
       requireTLS: true,
     });
     return transporter;
@@ -59,10 +79,18 @@ function getTransporter() {
   }
 }
 
+/**
+ * Main email send function - tries API first, falls back to SMTP
+ */
 export async function sendEmail({ to, subject, html }: EmailPayload) {
   const from = process.env.SMTP_FROM || '"Malwa Sports Academy" <no-reply@malwasports.com>';
-  const client = getTransporter();
 
+  // Try Brevo API first (cloud-friendly)
+  const apiResult = await sendViaBrevoAPI({ to, subject, html });
+  if (apiResult) return apiResult;
+
+  // Fall back to SMTP
+  const client = getTransporter();
   if (!client) {
     console.log(`\n--- 📬 [Email Simulation Mode] ---`);
     console.log(`From: ${from}`);
@@ -79,8 +107,8 @@ export async function sendEmail({ to, subject, html }: EmailPayload) {
       subject,
       html,
     });
-    console.log(`📨 Email successfully dispatched. Message ID: ${info.messageId}`);
-    return { success: true, messageId: info.messageId };
+    console.log(`📨 Email successfully dispatched via SMTP. Message ID: ${info.messageId}`);
+    return { success: true, messageId: info.messageId, provider: "smtp" };
   } catch (error: any) {
     console.error("❌ Failed to send SMTP email:", error.message);
     return { success: false, error: error.message };
