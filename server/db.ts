@@ -177,7 +177,7 @@ export async function seedDatabase() {
       for (const u of seedUsers) {
         const existing = await User.findOne({ email: u.email.toLowerCase() });
         if (!existing) {
-          const userToSave = { ...u };
+          const userToSave: any = { ...u };
           delete userToSave._id; // Let Mongo generate _id
           const user = new User(userToSave);
           await user.save();

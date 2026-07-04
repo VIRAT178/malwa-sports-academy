@@ -9,10 +9,10 @@ interface EmailPayload {
 let transporter: nodemailer.Transporter | null = null;
 
 /**
- * Send email via Brevo REST API (preferred for cloud environments)
+ * Send email via SendGrid REST API (preferred for cloud environments)
  */
-async function sendViaBrevoAPI({ to, subject, html }: EmailPayload) {
-  const apiKey = process.env.BREVO_API_KEY;
+async function sendViaSendGridAPI({ to, subject, html }: EmailPayload) {
+  const apiKey = process.env.SENDGRID_API_KEY?.trim();
   const from = process.env.SMTP_FROM || '"Malwa Sports Academy" <no-reply@malwasports.com>';
 
   if (!apiKey) {
@@ -20,30 +20,32 @@ async function sendViaBrevoAPI({ to, subject, html }: EmailPayload) {
   }
 
   try {
-    const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+    const fromEmail = from.includes("<") ? from.split("<")[1].replace(">", "").trim() : from;
+    const fromName = from.includes('"') ? from.split('"')[1] : "Malwa Sports Academy";
+
+    const response = await fetch("https://api.sendgrid.com/v3/mail/send", {
       method: "POST",
       headers: {
-        "api-key": apiKey,
+        Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        sender: { email: from.includes("<") ? from.split("<")[1].replace(">", "") : from, name: from.includes('"') ? from.split('"')[1] : "Malwa Sports Academy" },
-        to: [{ email: to }],
+        personalizations: [{ to: [{ email: to }] }],
+        from: { email: fromEmail, name: fromName },
         subject,
-        htmlContent: html,
+        content: [{ type: "text/html", value: html }],
       }),
     });
 
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(`Brevo API error: ${error.message || response.statusText}`);
+      const errorBody = await response.text();
+      throw new Error(`SendGrid API error: ${errorBody || response.statusText}`);
     }
 
-    const data: any = await response.json();
-    console.log(`📨 Email successfully dispatched via Brevo API. Message ID: ${data.messageId}`);
-    return { success: true, messageId: data.messageId, provider: "brevo-api" };
+    console.log("📨 Email successfully dispatched via SendGrid API.");
+    return { success: true, provider: "sendgrid-api" };
   } catch (error: any) {
-    console.error("⚠️ Brevo API failed, falling back to SMTP:", error.message);
+    console.error("⚠️ SendGrid API failed, falling back to SMTP:", error.message);
     return null;
   }
 }
@@ -85,8 +87,8 @@ function getTransporter() {
 export async function sendEmail({ to, subject, html }: EmailPayload) {
   const from = process.env.SMTP_FROM || '"Malwa Sports Academy" <no-reply@malwasports.com>';
 
-  // Try Brevo API first (cloud-friendly)
-  const apiResult = await sendViaBrevoAPI({ to, subject, html });
+  // Try SendGrid API first (cloud-friendly)
+  const apiResult = await sendViaSendGridAPI({ to, subject, html });
   if (apiResult) return apiResult;
 
   // Fall back to SMTP

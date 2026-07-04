@@ -23,10 +23,11 @@ Add the following secret environment variables in the **Environment Variables** 
 | `NODE_ENV` | Set to `production` |
 | `GEMINI_API_KEY` | Your Google Gemini API Key for AI Coaching queries |
 | `MONGODB_URI` | Your live MongoDB Connection string (Atlas or Render database) |
-| `SMTP_HOST` | Host address of SMTP server for transactional emails |
+| `SENDGRID_API_KEY` | SendGrid API key for transactional email delivery via the REST API |
+| `SMTP_HOST` | SMTP host for fallback delivery (typically `smtp.sendgrid.net`) |
 | `SMTP_PORT` | Port of SMTP server (usually 587 or 465) |
-| `SMTP_USER` | Username of your SMTP email sender account |
-| `SMTP_PASS` | Password of your SMTP email sender account |
+| `SMTP_USER` | SMTP username for fallback delivery (usually `apikey`) |
+| `SMTP_PASS` | SMTP password for fallback delivery, usually the same SendGrid API key |
 | `SMTP_FROM` | From email headers, e.g. `"Malwa Sports Academy" <no-reply@domain.com>` |
 | `ADMIN_EMAIL` | Administrative email receiving system contact messages |
 
