@@ -248,16 +248,16 @@ app.post("/api/auth/register", async (req, res) => {
       savedUser = newUserRecord;
     }
 
-    // Dispatch user and admin registration emails
-    try {
-      await sendWelcomeEmail(savedUser);
-      await sendRegistrationAdminAlertEmail(savedUser);
-    } catch (mailError: any) {
-      console.error("Failed to dispatch registration emails:", mailError.message);
-    }
-
     // Remove password before sending back
     delete savedUser.password;
+
+    // Send emails in the background without blocking response
+    sendWelcomeEmail(savedUser).catch((err: any) => {
+      console.error("Failed to dispatch welcome email:", err.message);
+    });
+    sendRegistrationAdminAlertEmail(savedUser).catch((err: any) => {
+      console.error("Failed to dispatch admin alert email:", err.message);
+    });
     res.status(201).json({ success: true, user: savedUser, dbPersisted: dbConnected });
   } catch (error: any) {
     console.error("Registration error:", error);
@@ -340,11 +340,10 @@ app.post("/api/auth/forgot-password", async (req, res) => {
     const protocol = req.headers["x-forwarded-proto"] || req.protocol;
     const resetLink = `${protocol}://${host}/?view=reset-password&token=${token}`;
 
-    try {
-      await sendPasswordResetEmail(email, resetLink);
-    } catch (mailError: any) {
-      console.error("SMTP Forgot Password email fail:", mailError.message);
-    }
+    // Send reset email in the background without blocking response
+    sendPasswordResetEmail(email, resetLink).catch((err: any) => {
+      console.error("SMTP Forgot Password email fail:", err.message);
+    });
 
     res.json({ success: true, message: "Recovery credentials dispatched successfully." });
   } catch (error: any) {
@@ -507,12 +506,10 @@ app.post("/api/admissions", async (req, res) => {
       inMemoryDb.admissions.push(admissionRecord);
     }
 
-    // Dispatch SMTP notification emails
-    try {
-      await sendAdmissionConfirmationEmail(savedTicket);
-    } catch (mailError: any) {
-      console.error("Failed to dispatch admission emails:", mailError.message);
-    }
+    // Send admission confirmation emails in the background without blocking response
+    sendAdmissionConfirmationEmail(savedTicket).catch((err: any) => {
+      console.error("Failed to dispatch admission emails:", err.message);
+    });
 
     res.status(201).json({ success: true, ticket: savedTicket, dbPersisted: dbConnected });
   } catch (error: any) {
@@ -565,12 +562,10 @@ app.post("/api/admissions/action", async (req, res) => {
       return res.status(404).json({ error: "Admission trial record not found." });
     }
 
-    // Send confirmation emails to user and admin
-    try {
-      await sendAdmissionStatusUpdateEmail(targetRecord);
-    } catch (e: any) {
-      console.error("Admissions status email error:", e.message);
-    }
+    // Send status update emails in the background without blocking response
+    sendAdmissionStatusUpdateEmail(targetRecord).catch((err: any) => {
+      console.error("Admissions status email error:", err.message);
+    });
 
     res.json({ success: true, data: targetRecord });
   } catch (error: any) {
@@ -611,12 +606,10 @@ app.post("/api/contact", async (req, res) => {
       inMemoryDb.contacts.push(contactRecord);
     }
 
-    // Dispatch SMTP notification to both admin and inquirer
-    try {
-      await sendContactInquiryEmail(contactRecord);
-    } catch (mailError: any) {
-      console.error("Failed to dispatch contact inquiry email:", mailError.message);
-    }
+    // Send contact inquiry emails in the background without blocking response
+    sendContactInquiryEmail(contactRecord).catch((err: any) => {
+      console.error("Failed to dispatch contact inquiry email:", err.message);
+    });
 
     res.json({ success: true, dbPersisted: dbConnected });
   } catch (error: any) {
@@ -754,12 +747,10 @@ app.post("/api/event-register", async (req, res) => {
       inMemoryDb.events.push(eventRecord);
     }
 
-    // Dispatch SMTP email notification (to admin, and athlete if email is provided)
-    try {
-      await sendEventRegistrationNotificationEmail(eventRecord);
-    } catch (mailError: any) {
-      console.error("Failed to dispatch event registration email:", mailError.message);
-    }
+    // Send event registration emails in the background without blocking response
+    sendEventRegistrationNotificationEmail(eventRecord).catch((err: any) => {
+      console.error("Failed to dispatch event registration email:", err.message);
+    });
 
     res.json({ success: true, token, dbPersisted: dbConnected });
   } catch (error: any) {
@@ -857,11 +848,10 @@ app.post("/api/event-register/action", async (req, res) => {
       return res.status(404).json({ error: "Event registration record not found." });
     }
 
-    try {
-      await sendEventStatusUpdateEmail(targetRecord);
-    } catch (e: any) {
-      console.error("Event update email notification fail:", e.message);
-    }
+    // Send event status update emails in the background without blocking response
+    sendEventStatusUpdateEmail(targetRecord).catch((err: any) => {
+      console.error("Event update email notification fail:", err.message);
+    });
 
     res.json({ success: true, data: targetRecord });
   } catch (error: any) {
@@ -919,11 +909,10 @@ app.post("/api/event-register/cancel", async (req, res) => {
       targetRecord = inMemoryDb.events[idx];
     }
 
-    try {
-      await sendEventCancellationEmail(targetRecord);
-    } catch (mailError: any) {
-      console.error("Failed to dispatch event cancellation email:", mailError.message);
-    }
+    // Send cancellation email in the background without blocking response
+    sendEventCancellationEmail(targetRecord).catch((err: any) => {
+      console.error("Failed to dispatch event cancellation email:", err.message);
+    });
 
     res.json({ success: true, data: targetRecord });
   } catch (error: any) {
@@ -958,11 +947,10 @@ app.delete("/api/event-registrations/:token", async (req, res) => {
       return res.status(404).json({ error: "Event registration record not found." });
     }
 
-    try {
-      await sendEventDeletedEmail(deletedRecord);
-    } catch (mailError: any) {
-      console.error("Failed to dispatch event deletion email:", mailError.message);
-    }
+    // Send deletion email in the background without blocking response
+    sendEventDeletedEmail(deletedRecord).catch((err: any) => {
+      console.error("Failed to dispatch event deletion email:", err.message);
+    });
 
     res.json({ success: true, data: deletedRecord, dbPersisted: dbConnected });
   } catch (error: any) {
