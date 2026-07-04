@@ -8,13 +8,33 @@ interface EmailPayload {
 
 let transporter: nodemailer.Transporter | null = null;
 
+function normalizeSmtpHost(host: string | undefined, user: string | undefined) {
+  const trimmedHost = host?.trim();
+
+  if (!trimmedHost) {
+    if (user?.includes("@")) {
+      const domain = user.split("@")[1];
+      return domain ? `smtp.${domain}` : undefined;
+    }
+    return undefined;
+  }
+
+  if (trimmedHost.includes("@")) {
+    const domain = trimmedHost.split("@")[1];
+    return domain ? (domain.startsWith("smtp.") ? domain : `smtp.${domain}`) : undefined;
+  }
+
+  return trimmedHost;
+}
+
 function getTransporter() {
   if (transporter) return transporter;
 
-  const host = process.env.SMTP_HOST;
+  const user = process.env.SMTP_USER?.trim();
+  const pass = process.env.SMTP_PASS?.trim();
+  const configuredHost = process.env.SMTP_HOST?.trim();
+  const host = normalizeSmtpHost(configuredHost, user);
   const port = process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT) : 587;
-  const user = process.env.SMTP_USER;
-  const pass = process.env.SMTP_PASS;
 
   if (!host || !user || !pass) {
     console.warn("⚠️ SMTP environment variables (SMTP_HOST, SMTP_USER, SMTP_PASS) are not defined. Outgoing emails will be logged to console in Simulation Mode.");
@@ -30,6 +50,7 @@ function getTransporter() {
         user,
         pass,
       },
+      requireTLS: true,
     });
     return transporter;
   } catch (error: any) {
